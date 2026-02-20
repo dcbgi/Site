@@ -124,6 +124,18 @@
       gap: 0.5rem;
     }
     .control-label { color: var(--text-muted); font-size: 0.88rem; }
+    .hand-hint {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+    }
+    .hand-hint-item {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      color: var(--text-muted);
+    }
+    .hand-legend-detail { grid-column: 1 / -1; }
     .keys {
       display: flex;
       gap: 0.3rem;
@@ -241,10 +253,10 @@
         </div>
       </div>
       <div class="joint-control">
-        <h3>Grab</h3>
+        <h3>Hand</h3>
         <div class="joint-btns">
-          <button data-joint="grab" data-dir="1">+ g</button>
-          <button data-joint="grab" data-dir="-1">− G</button>
+          <button data-joint="grab" data-dir="1">Close g</button>
+          <button data-joint="grab" data-dir="-1">Open G</button>
         </div>
       </div>
     </div>
@@ -266,8 +278,14 @@
           <span class="keys"><kbd>w</kbd><kbd>W</kbd></span>
         </div>
         <div class="control-row">
-          <span class="control-label">Grab</span>
-          <span class="keys"><kbd>g</kbd><kbd>G</kbd></span>
+          <span class="control-label">Hand (fingers)</span>
+          <span class="keys"><kbd title="Close fingers">g</kbd><kbd title="Open fingers">G</kbd></span>
+        </div>
+        <div class="control-row hand-legend-detail" aria-hidden="true">
+          <span class="hand-hint">
+            <span class="hand-hint-item"><kbd>g</kbd> close</span>
+            <span class="hand-hint-item"><kbd>G</kbd> open</span>
+          </span>
         </div>
       </div>
     </div>
