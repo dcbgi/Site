@@ -14,6 +14,14 @@ const projects = [
     tags: ["HTML", "CSS", "JavaScript"],
     github: "https://github.com/dcbgi/Site",
   },
+  {
+    title: "3D Robot Arm",
+    icon: "🦾",
+    desc: "Interactive 3D robotic arm with flexion, twisting, and grabbing — ported from C++/OpenGL to JavaScript with Three.js.",
+    tags: ["C++", "OpenGL", "Three.js", "JavaScript"],
+    github: "https://github.com/dcbgi/arm",
+    demo: "arm.html",
+  },
   // ── Add more projects below ──
   // {
   //   title: "My Next Project",
