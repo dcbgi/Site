@@ -92,4 +92,3 @@ document.addEventListener("DOMContentLoaded", () => {
 if (typeof module !== "undefined") {
   module.exports = { projects, renderProjects, escapeHtml };
 }
-

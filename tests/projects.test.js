@@ -49,15 +49,9 @@ describe("projects array", () => {
       }
 
       if (project.demo !== undefined) {
-        test("demo is a valid HTTPS URL or a same-site relative path", () => {
-          const isRelative = !project.demo.includes("://") && !project.demo.startsWith("//");
-          if (isRelative) {
-            // Relative paths (e.g. "arm.html") are valid for same-site demos
-            expect(project.demo.trim().length).toBeGreaterThan(0);
-          } else {
-            expect(() => new URL(project.demo)).not.toThrow();
-            expect(new URL(project.demo).protocol).toBe("https:");
-          }
+        test("demo is a valid HTTPS URL", () => {
+          expect(() => new URL(project.demo)).not.toThrow();
+          expect(new URL(project.demo).protocol).toBe("https:");
         });
       }
     });
