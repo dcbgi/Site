@@ -34,3 +34,17 @@ Open `index.html` directly in a browser, or serve it with any static file server
 ```bash
 npx serve .
 ```
+
+## Deploying via cPanel
+
+This repository includes a `.cpanel.yml` file that enables automatic deployment through cPanel's **Git Version Control** feature.
+
+**Setup (one-time):**
+1. Log in to cPanel and open **Git Version Control**.
+2. Clone this repository using its GitHub URL.
+
+**Deploying updates:**
+- Push commits to the linked branch, then click **Update** followed by **Deploy HEAD Commit** in cPanel, or
+- Use the **Deploy HEAD Commit** button at any time to manually trigger a deployment.
+
+Files deployed to `public_html`: `index.html`, `styles.css`, `script.js`.
