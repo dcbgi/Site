@@ -87,3 +87,9 @@ document.addEventListener("DOMContentLoaded", () => {
   renderProjects();
   setYear();
 });
+
+// ─── Test exports (Node / Jest only) ─────────────────────────────────────────
+if (typeof module !== "undefined") {
+  module.exports = { projects, renderProjects, escapeHtml };
+}
+

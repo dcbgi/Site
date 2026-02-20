@@ -4,13 +4,16 @@
 
 const fs   = require("fs");
 const path = require("path");
-const { JSDOM } = require("jsdom");
 
 const html = fs.readFileSync(path.join(__dirname, "..", "arm.html"), "utf8");
-let document;
 
 beforeAll(() => {
-  document = new JSDOM(html).window.document;
+  // Parse arm.html into a detached document; scripts are not executed.
+  const parsed = new DOMParser().parseFromString(html, "text/html");
+  // Remove all script elements so none execute when we copy into the live doc.
+  parsed.querySelectorAll("script").forEach((el) => el.remove());
+  document.head.innerHTML = parsed.head.innerHTML;
+  document.body.innerHTML = parsed.body.innerHTML;
 });
 
 // ── Controls panel presence ───────────────────────────────────────────────────
