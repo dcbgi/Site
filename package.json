@@ -1,0 +1,28 @@
+{
+  "name": "site",
+  "version": "1.0.0",
+  "description": "A personal profile website that showcases projects I create.",
+  "main": "script.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "testEnvironment": "jsdom"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dcbgi/Site.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dcbgi/Site/issues"
+  },
+  "homepage": "https://github.com/dcbgi/Site#readme",
+  "devDependencies": {
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0"
+  }
+}
