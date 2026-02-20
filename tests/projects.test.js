@@ -3,7 +3,31 @@
  * when new projects are added to script.js.
  */
 
+const fs   = require("fs");
+const path = require("path");
 const { projects, renderProjects, escapeHtml } = require("../script.js");
+
+// ─── Nav-logo home link ───────────────────────────────────────────────────────
+
+describe("index.html nav-logo", () => {
+  let indexDoc;
+
+  beforeAll(() => {
+    const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+    indexDoc = new DOMParser().parseFromString(html, "text/html");
+  });
+
+  test("nav-logo is an anchor tag", () => {
+    const logo = indexDoc.querySelector(".nav-logo");
+    expect(logo).not.toBeNull();
+    expect(logo.tagName.toLowerCase()).toBe("a");
+  });
+
+  test("nav-logo links to index.html", () => {
+    const logo = indexDoc.querySelector(".nav-logo");
+    expect(logo.getAttribute("href")).toBe("index.html");
+  });
+});
 
 // ─── Project data schema ──────────────────────────────────────────────────────
 
