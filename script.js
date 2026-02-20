@@ -30,14 +30,6 @@ const projects = [
     github: "https://github.com/dcbgi/Tipper",
   },
   {
-    title: "tvst",
-    icon: "📺",
-    desc: "TV static visualiser — a real-time animated noise effect rendered on an HTML5 canvas, faithful to classic analogue television interference.",
-    tags: ["HTML", "CSS", "JavaScript", "Canvas"],
-    github: "https://github.com/dcbgi/tvst",
-    demo: "tvst.html",
-  },
-  {
     title: "TV Show Tracker",
     icon: "🎬",
     desc: "Personal TV show tracker — log every episode you watch, rate them with stars, and keep tabs on what you're currently watching or have completed.",
