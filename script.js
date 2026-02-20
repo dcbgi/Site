@@ -29,6 +29,14 @@ const projects = [
     tags: ["Android", "Java"],
     github: "https://github.com/dcbgi/Tipper",
   },
+  {
+    title: "tvst",
+    icon: "📺",
+    desc: "TV static visualiser — a real-time animated noise effect rendered on an HTML5 canvas, faithful to classic analogue television interference.",
+    tags: ["HTML", "CSS", "JavaScript", "Canvas"],
+    github: "https://github.com/dcbgi/tvst",
+    demo: "tvst.html",
+  },
   // ── Add more projects below ──
   // {
   //   title: "My Next Project",

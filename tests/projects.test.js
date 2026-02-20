@@ -49,10 +49,17 @@ describe("projects array", () => {
       }
 
       if (project.demo !== undefined) {
-        test("demo is a valid HTTPS URL", () => {
-          expect(() => new URL(project.demo)).not.toThrow();
-          expect(new URL(project.demo).protocol).toBe("https:");
+        test("demo is a non-empty string (relative path or HTTPS URL)", () => {
+          expect(typeof project.demo).toBe("string");
+          expect(project.demo.trim().length).toBeGreaterThan(0);
         });
+
+        if (project.demo.startsWith("https://")) {
+          test("demo is a valid HTTPS URL", () => {
+            expect(() => new URL(project.demo)).not.toThrow();
+            expect(new URL(project.demo).protocol).toBe("https:");
+          });
+        }
       }
     });
   });
