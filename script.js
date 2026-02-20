@@ -22,6 +22,13 @@ const projects = [
     github: "https://github.com/dcbgi/arm",
     demo: "arm.html",
   },
+  {
+    title: "Tipper",
+    icon: "💰",
+    desc: "Android tip calculator app — quickly compute restaurant tips at 10%, 15%, or a custom percentage.",
+    tags: ["Android", "Java"],
+    github: "https://github.com/dcbgi/Tipper",
+  },
   // ── Add more projects below ──
   // {
   //   title: "My Next Project",
