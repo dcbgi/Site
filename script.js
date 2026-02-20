@@ -37,6 +37,13 @@ const projects = [
     github: "https://github.com/dcbgi/tvst",
     demo: "tvst.html",
   },
+  {
+    title: "TV Show Tracker",
+    icon: "🎬",
+    desc: "Personal TV show tracker — log every episode you watch, rate them with stars, and keep tabs on what you're currently watching or have completed.",
+    tags: ["HTML", "CSS", "JavaScript", "localStorage"],
+    demo: "tvtracker.html",
+  },
   // ── Add more projects below ──
   // {
   //   title: "My Next Project",
