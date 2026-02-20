@@ -27,6 +27,23 @@ Open `script.js` and add an entry to the `projects` array:
 
 Save the file — the card appears automatically on the page.
 
+## Testing
+
+Tests live in `tests/projects.test.js` and use [Jest](https://jestjs.io/).  
+They validate every project entry in the `projects` array and the rendering logic, so a malformed project is caught before it reaches production.
+
+```bash
+npm install      # first time only
+npm test
+```
+
+The tests check that each project:
+- Has required non-empty string fields: `title`, `icon`, `desc`
+- Has `tags` as an array of non-empty strings
+- Uses valid HTTPS URLs for the optional `github` and `demo` fields
+
+They also verify that HTML special characters in project data are escaped (XSS protection) and that the card renderer produces the expected output.
+
 ## Running Locally
 
 Open `index.html` directly in a browser, or serve it with any static file server:
