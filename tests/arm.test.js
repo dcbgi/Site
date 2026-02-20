@@ -1,5 +1,5 @@
 // tests/arm.test.js
-// Tests for the arm.html hand controls legend.
+// Tests for the arm.html hand controls legend and visual correctness.
 "use strict";
 
 const fs   = require("fs");
@@ -66,4 +66,18 @@ test("Hand button group has Close and Open buttons", () => {
 test("Hand buttons still carry data-joint=grab for scripting", () => {
   const grabBtns = document.querySelectorAll('[data-joint="grab"]');
   expect(grabBtns.length).toBe(2);
+});
+
+// ── Camera position centers the arm in view ───────────────────────────────────
+// The arm spans x = -1 to x ≈ 4.5 in world space; camera must be offset to x ≈ 1.75
+// so the full arm (including fingers) is visible without clipping.
+test("Three.js camera x-position is set to 1.75 to center the arm in view", () => {
+  expect(html).toMatch(/camera\.position\.set\(1\.75,/);
+});
+
+// ── Canvas focus indicator ────────────────────────────────────────────────────
+// The canvas has tabindex="0" so keyboard users can focus it; a :focus outline
+// must be defined so users can see when keyboard input is active.
+test("arm-canvas has a CSS :focus outline style for keyboard focus visibility", () => {
+  expect(html).toMatch(/#arm-canvas:focus\s*\{[^}]*outline[^}]*\}/);
 });
