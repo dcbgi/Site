@@ -89,6 +89,26 @@ describe("projects array", () => {
   });
 });
 
+// ─── Deployment config covers all local demo pages ───────────────────────────
+
+describe(".cpanel.yml deployment", () => {
+  let cpanelContent;
+
+  beforeAll(() => {
+    cpanelContent = fs.readFileSync(path.join(__dirname, "..", ".cpanel.yml"), "utf8");
+  });
+
+  const localDemos = projects
+    .filter((p) => p.demo && !p.demo.startsWith("https://"))
+    .map((p) => p.demo);
+
+  localDemos.forEach((demoFile) => {
+    test(`deploys ${demoFile} via a copy command`, () => {
+      expect(cpanelContent).toMatch(new RegExp("/bin/cp.*\\b" + demoFile + "\\b"));
+    });
+  });
+});
+
 // ─── escapeHtml ───────────────────────────────────────────────────────────────
 
 describe("escapeHtml", () => {
