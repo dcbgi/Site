@@ -17,15 +17,15 @@ describe("index.html nav-logo", () => {
     indexDoc = new DOMParser().parseFromString(html, "text/html");
   });
 
-  test("nav-logo is an anchor tag", () => {
+  test("nav-logo is a span (not a link)", () => {
     const logo = indexDoc.querySelector(".nav-logo");
     expect(logo).not.toBeNull();
-    expect(logo.tagName.toLowerCase()).toBe("a");
+    expect(logo.tagName.toLowerCase()).toBe("span");
   });
 
-  test("nav-logo links to index.html", () => {
+  test("nav-logo has no href", () => {
     const logo = indexDoc.querySelector(".nav-logo");
-    expect(logo.getAttribute("href")).toBe("index.html");
+    expect(logo.getAttribute("href")).toBeNull();
   });
 });
 

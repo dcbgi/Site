@@ -62,12 +62,12 @@ test("Hand button group has Close and Open buttons", () => {
   expect(btnText.some((t) => t.includes("open"))).toBe(true);
 });
 
-// ── Nav-logo is a home link ───────────────────────────────────────────────────
-test("nav-logo in arm.html is an anchor tag linking to index.html", () => {
+// ── Nav-logo is plain text (not a link) ──────────────────────────────────────
+test("nav-logo in arm.html is a span (not a link)", () => {
   const logo = document.querySelector(".nav-logo");
   expect(logo).not.toBeNull();
-  expect(logo.tagName.toLowerCase()).toBe("a");
-  expect(logo.getAttribute("href")).toBe("index.html");
+  expect(logo.tagName.toLowerCase()).toBe("span");
+  expect(logo.getAttribute("href")).toBeNull();
 });
 
 // ── data-joint="grab" wiring still intact ────────────────────────────────────
