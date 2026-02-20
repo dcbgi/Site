@@ -5,7 +5,5 @@ deployment:
     - /bin/cp -v index.html $DEPLOYPATH
     - /bin/cp -v styles.css $DEPLOYPATH
     - /bin/cp -v script.js $DEPLOYPATH
-    - /bin/cp -v arm.html $DEPLOYPATH
-    - /bin/cp -v three.min.js $DEPLOYPATH
     - /bin/cp -v tvst.html $DEPLOYPATH
     - /bin/cp -v tvtracker.html $DEPLOYPATH
