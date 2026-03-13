@@ -303,6 +303,109 @@ a:hover {
 }
 
 /* ===========================
+   Day Prompt Modal
+   =========================== */
+.day-prompt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(6px);
+  animation: fade-in 0.3s ease;
+}
+
+.day-prompt-overlay.hidden {
+  display: none;
+}
+
+.day-prompt-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2.5rem 2rem;
+  max-width: 440px;
+  width: 90%;
+  text-align: center;
+  box-shadow: var(--shadow);
+  animation: slide-up 0.3s ease;
+}
+
+.day-prompt-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.day-prompt-question {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  margin-bottom: 1.75rem;
+}
+
+.day-prompt-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.day-prompt-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.65rem 1.25rem;
+  transition: border-color var(--transition), background var(--transition), color var(--transition);
+}
+
+.day-prompt-btn:hover {
+  background: rgba(124,106,247,.1);
+  border-color: var(--accent-lt);
+  color: var(--accent-lt);
+}
+
+/* ===========================
+   Fullscreen Emoji Response
+   =========================== */
+.emoji-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  cursor: pointer;
+  animation: fade-in 0.3s ease;
+}
+
+.emoji-fullscreen.hidden {
+  display: none;
+}
+
+.emoji-fullscreen-char {
+  font-size: min(80vw, 80vh);
+  line-height: 1;
+  user-select: none;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===========================
    Footer
    =========================== */
 .footer {
