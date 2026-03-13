@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How's Your Day? – dcbgi</title>
+  <style>
+    /* ── Reset & Base ──────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --surface2:  #22263a;
+      --border:    #2a2d3a;
+      --accent:    #7c6af7;
+      --accent-lt: #a899ff;
+      --text:      #e2e4f0;
+      --text-muted:#8b8fa8;
+      --radius:    12px;
+      --transition:0.2s ease;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: var(--accent-lt); text-decoration: none; }
+    a:hover { color: #fff; }
+
+    /* ── Navbar ────────────────────────────────────────────────────────────── */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(15,17,23,.9);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent-lt);
+      letter-spacing: .05em;
+    }
+    .nav-back {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: color var(--transition);
+    }
+    .nav-back:hover { color: var(--text); }
+
+    /* ── Main ──────────────────────────────────────────────────────────────── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1.5rem 4rem;
+      gap: 2.5rem;
+      text-align: center;
+    }
+
+    /* ── Question ──────────────────────────────────────────────────────────── */
+    .question {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .question span {
+      color: var(--accent-lt);
+    }
+
+    /* ── Mood Buttons ──────────────────────────────────────────────────────── */
+    .mood-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      max-width: 680px;
+    }
+    .mood-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 1rem 1.5rem;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+      min-width: 110px;
+    }
+    .mood-btn:hover {
+      border-color: var(--accent);
+      background: var(--surface2);
+      transform: translateY(-3px);
+    }
+    .mood-btn:active { transform: translateY(0); }
+    .mood-btn .btn-emoji { font-size: 2rem; line-height: 1; }
+    .mood-btn .btn-label { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* ── Emoji Overlay ─────────────────────────────────────────────────────── */
+    .emoji-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15,17,23,.88);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .emoji-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .overlay-emoji {
+      font-size: clamp(8rem, 30vw, 16rem);
+      line-height: 1;
+      animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .overlay-label {
+      margin-top: 1.5rem;
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: 700;
+      color: var(--accent-lt);
+      animation: fadein 0.5s 0.15s ease forwards;
+      opacity: 0;
+    }
+    .overlay-hint {
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      animation: fadein 0.5s 0.3s ease forwards;
+      opacity: 0;
+    }
+
+    /* ── Animations ────────────────────────────────────────────────────────── */
+    @keyframes pop {
+      from { transform: scale(0.3); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Footer ────────────────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 1.2rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar" aria-label="Site navigation">
+    <a href="index.html" class="nav-logo">Berry Better Solutions</a>
+    <a href="index.html" class="nav-back">← Back to Portfolio</a>
+  </nav>
+
+  <!-- Main content -->
+  <main>
+    <h1 class="question">How's your <span>day</span>?</h1>
+
+    <div class="mood-buttons" role="group" aria-label="Mood choices">
+      <button class="mood-btn" data-emoji="🤩" data-label="Amazing!" aria-label="Amazing">
+        <span class="btn-emoji" aria-hidden="true">🤩</span>
+        <span class="btn-label">Amazing!</span>
+      </button>
+      <button class="mood-btn" data-emoji="😊" data-label="Pretty good" aria-label="Pretty good">
+        <span class="btn-emoji" aria-hidden="true">😊</span>
+        <span class="btn-label">Pretty good</span>
+      </button>
+      <button class="mood-btn" data-emoji="😐" data-label="Just okay" aria-label="Just okay">
+        <span class="btn-emoji" aria-hidden="true">😐</span>
+        <span class="btn-label">Just okay</span>
+      </button>
+      <button class="mood-btn" data-emoji="😕" data-label="Not great" aria-label="Not great">
+        <span class="btn-emoji" aria-hidden="true">😕</span>
+        <span class="btn-label">Not great</span>
+      </button>
+      <button class="mood-btn" data-emoji="😢" data-label="Terrible" aria-label="Terrible">
+        <span class="btn-emoji" aria-hidden="true">😢</span>
+        <span class="btn-label">Terrible</span>
+      </button>
+    </div>
+  </main>
+
+  <!-- Emoji overlay (hidden by default) -->
+  <div class="emoji-overlay" id="emoji-overlay" role="dialog" aria-modal="true" aria-label="Mood response">
+    <div class="overlay-emoji" id="overlay-emoji" aria-hidden="true"></div>
+    <div class="overlay-label" id="overlay-label"></div>
+    <div class="overlay-hint">Click anywhere to close</div>
+  </div>
+
+  <footer>
+    &copy; <span id="year"></span> dcbgi
+  </footer>
+
+  <script>
+    // ── Mood button click → show overlay ─────────────────────────────────────
+    const overlay      = document.getElementById("emoji-overlay");
+    let   overlayEmoji = document.getElementById("overlay-emoji");
+    const overlayLabel = document.getElementById("overlay-label");
+
+    document.querySelectorAll(".mood-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const emoji = btn.dataset.emoji;
+        const label = btn.dataset.label;
+
+        // Reset animation by cloning the emoji element then reassigning the reference
+        const clonedEmoji = overlayEmoji.cloneNode(true);
+        clonedEmoji.textContent = emoji;
+        overlayEmoji.replaceWith(clonedEmoji);
+        overlayEmoji = clonedEmoji;
+
+        overlayLabel.textContent = label;
+        overlay.classList.add("visible");
+        overlay.focus();
+      });
+    });
+
+    // ── Close overlay on click or Escape key ─────────────────────────────────
+    overlay.addEventListener("click", () => overlay.classList.remove("visible"));
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") overlay.classList.remove("visible");
+    });
+
+    // ── Footer year ───────────────────────────────────────────────────────────
+    const yearEl = document.getElementById("year");
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
