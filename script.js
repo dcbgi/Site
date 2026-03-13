@@ -95,42 +95,13 @@ function setYear() {
   if (el) el.textContent = new Date().getFullYear();
 }
 
-// ─── Day Prompt ───────────────────────────────────────────────────────────────
-function initDayPrompt() {
-  const overlay    = document.getElementById("day-prompt-overlay");
-  const emojiScreen = document.getElementById("emoji-fullscreen");
-  const emojiChar  = document.getElementById("emoji-fullscreen-char");
-  if (!overlay || !emojiScreen || !emojiChar) return;
-
-  overlay.querySelectorAll(".day-prompt-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      overlay.classList.add("hidden");
-      emojiChar.textContent = btn.dataset.emoji;
-      emojiScreen.classList.remove("hidden");
-    });
-  });
-
-  function dismissEmoji() {
-    emojiScreen.classList.add("hidden");
-  }
-
-  emojiScreen.addEventListener("click", dismissEmoji);
-  emojiScreen.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      dismissEmoji();
-    }
-  });
-}
-
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
   renderProjects();
   setYear();
-  initDayPrompt();
 });
 
 // ─── Test exports (Node / Jest only) ─────────────────────────────────────────
 if (typeof module !== "undefined") {
-  module.exports = { projects, renderProjects, escapeHtml, initDayPrompt };
+  module.exports = { projects, renderProjects, escapeHtml };
 }

@@ -5,7 +5,7 @@
 
 const fs   = require("fs");
 const path = require("path");
-const { projects, renderProjects, escapeHtml, initDayPrompt } = require("../script.js");
+const { projects, renderProjects, escapeHtml } = require("../script.js");
 
 // ─── Nav-logo home link ───────────────────────────────────────────────────────
 
@@ -179,75 +179,3 @@ describe("renderProjects", () => {
   });
 });
 
-// ─── initDayPrompt ───────────────────────────────────────────────────────────
-
-describe("initDayPrompt", () => {
-  function setupDOM(extraOptions = "") {
-    document.body.innerHTML = `
-      <div id="day-prompt-overlay">
-        <button class="day-prompt-btn" data-emoji="🤩">Amazing!</button>
-        <button class="day-prompt-btn" data-emoji="😊">Pretty good</button>
-        <button class="day-prompt-btn" data-emoji="😐">Just okay</button>
-        <button class="day-prompt-btn" data-emoji="😔">Not great</button>
-        <button class="day-prompt-btn" data-emoji="😭">Terrible</button>
-        ${extraOptions}
-      </div>
-      <div class="emoji-fullscreen hidden" id="emoji-fullscreen" tabindex="0">
-        <span id="emoji-fullscreen-char"></span>
-      </div>
-    `;
-  }
-
-  test("hides the overlay and shows the emoji screen when a button is clicked", () => {
-    setupDOM();
-    initDayPrompt();
-    const overlay     = document.getElementById("day-prompt-overlay");
-    const emojiScreen = document.getElementById("emoji-fullscreen");
-
-    document.querySelector('[data-emoji="😊"]').click();
-
-    expect(overlay.classList.contains("hidden")).toBe(true);
-    expect(emojiScreen.classList.contains("hidden")).toBe(false);
-  });
-
-  test("sets the correct emoji on the fullscreen element", () => {
-    setupDOM();
-    initDayPrompt();
-    const emojiChar = document.getElementById("emoji-fullscreen-char");
-
-    document.querySelector('[data-emoji="🤩"]').click();
-    expect(emojiChar.textContent).toBe("🤩");
-
-    document.querySelector('[data-emoji="😭"]').click();
-    expect(emojiChar.textContent).toBe("😭");
-  });
-
-  test("dismisses the emoji screen when it is clicked", () => {
-    setupDOM();
-    initDayPrompt();
-    const emojiScreen = document.getElementById("emoji-fullscreen");
-
-    document.querySelector('[data-emoji="😐"]').click();
-    expect(emojiScreen.classList.contains("hidden")).toBe(false);
-
-    emojiScreen.click();
-    expect(emojiScreen.classList.contains("hidden")).toBe(true);
-  });
-
-  test("dismisses the emoji screen when Enter is pressed on it", () => {
-    setupDOM();
-    initDayPrompt();
-    const emojiScreen = document.getElementById("emoji-fullscreen");
-
-    document.querySelector('[data-emoji="😔"]').click();
-    expect(emojiScreen.classList.contains("hidden")).toBe(false);
-
-    emojiScreen.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
-    expect(emojiScreen.classList.contains("hidden")).toBe(true);
-  });
-
-  test("does nothing gracefully when DOM elements are absent", () => {
-    document.body.innerHTML = "";
-    expect(() => initDayPrompt()).not.toThrow();
-  });
-});
