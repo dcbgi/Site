@@ -17,8 +17,8 @@ const projects = [
   {
     title: "3D Robot Arm",
     icon: "🦾",
-    desc: "Interactive 3D robotic arm with flexion, twisting, and grabbing — ported from C++/OpenGL to JavaScript with Three.js.",
-    tags: ["C++", "OpenGL", "Three.js", "JavaScript"],
+    desc: "Interactive 3D robotic arm with flexion, twisting, and grabbing — built with C++ and OpenGL.",
+    tags: ["C++", "OpenGL"],
     github: "https://github.com/dcbgi/arm",
   },
   {
