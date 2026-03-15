@@ -35,6 +35,13 @@ const projects = [
     tags: ["HTML", "CSS", "JavaScript", "localStorage"],
     demo: "tvtracker.html",
   },
+  {
+    title: "How's Your Day?",
+    icon: "😊",
+    desc: "Pick a mood and watch the matching emoji explode onto the screen — a tiny interactive check-in built with vanilla HTML, CSS, and JavaScript.",
+    tags: ["HTML", "CSS", "JavaScript"],
+    demo: "howsyourday.html",
+  },
   // ── Add more projects below ──
   // {
   //   title: "My Next Project",

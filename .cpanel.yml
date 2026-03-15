@@ -6,3 +6,4 @@ deployment:
     - /bin/cp -v styles.css $DEPLOYPATH
     - /bin/cp -v script.js $DEPLOYPATH
     - /bin/cp -v tvtracker.html $DEPLOYPATH
+    - /bin/cp -v howsyourday.html $DEPLOYPATH
