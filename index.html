@@ -4,11 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Profile</title>
+  <!-- styles.css contains all layout, colour, and responsive rules for this page -->
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-  <!-- Navigation -->
+  <!-- ── Navigation ─────────────────────────────────────────────────────────
+       Sticky top bar rendered by styles.css (.navbar).
+       The logo is an anchor so clicking it always returns to the top of the
+       page. The three links use in-page anchor targets (#about, #projects,
+       #contact) — smooth-scroll is enabled globally in styles.css via
+       `html { scroll-behavior: smooth; }`.
+  ──────────────────────────────────────────────────────────────────────── -->
   <nav class="navbar">
     <a href="index.html" class="nav-logo">Berry Better Solutions</a>
     <ul class="nav-links">
@@ -18,9 +25,15 @@
     </ul>
   </nav>
 
-  <!-- Hero / About Section -->
+  <!-- ── Hero / About Section ───────────────────────────────────────────────
+       Full-viewport-height intro section (id="about" matches the navbar link).
+       The avatar, headline, bio, and CTA button live inside .hero-content,
+       which is max-width constrained for comfortable reading.
+  ──────────────────────────────────────────────────────────────────────── -->
   <section class="hero" id="about">
     <div class="hero-content">
+      <!-- Circular avatar badge showing initials; aria-label describes it
+           to screen readers since there is no visible <img> element -->
       <div class="avatar" aria-label="Profile avatar">
         <span class="avatar-initials">DC</span>
       </div>
@@ -29,29 +42,42 @@
         Developer &amp; maker. I build projects that solve problems and explore new ideas.
         Take a look at what I've been working on below.
       </p>
+      <!-- Smooth-scrolls to the projects section below -->
       <a href="#projects" class="btn btn-primary">View Projects</a>
     </div>
   </section>
 
-  <!-- Projects Section -->
+  <!-- ── Projects Section ───────────────────────────────────────────────────
+       The #projects-grid div is intentionally left empty here.
+       script.js reads the `projects` array and injects one <article> card
+       per project at DOMContentLoaded, so adding a project only requires
+       editing the array in script.js — no HTML changes needed.
+  ──────────────────────────────────────────────────────────────────────── -->
   <section class="projects-section" id="projects">
     <div class="container">
       <h2 class="section-title">Projects</h2>
       <p class="section-subtitle">A collection of things I've built</p>
 
+      <!-- Project cards are rendered dynamically by script.js -->
       <div class="projects-grid" id="projects-grid">
-        <!-- Project cards are rendered by script.js -->
       </div>
     </div>
   </section>
 
-  <!-- Contact Section -->
+  <!-- ── Contact Section ────────────────────────────────────────────────────
+       Simple list of external profile links displayed as icon+label buttons.
+       rel="noopener noreferrer" prevents the opened tab from accessing this
+       page via window.opener (a standard security best practice for
+       target="_blank" links).
+  ──────────────────────────────────────────────────────────────────────── -->
   <section class="contact-section" id="contact">
     <div class="container">
       <h2 class="section-title">Get in Touch</h2>
       <p class="section-subtitle">Have a question or want to collaborate? Reach out!</p>
       <div class="contact-links">
         <a href="https://github.com/dcbgi" target="_blank" rel="noopener noreferrer" class="contact-link">
+          <!-- GitHub SVG icon; aria-hidden keeps the decorative graphic out of
+               the accessibility tree — the anchor's text "GitHub" is sufficient -->
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577
               0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756
@@ -70,10 +96,17 @@
     </div>
   </section>
 
+  <!-- ── Footer ──────────────────────────────────────────────────────────────
+       The #year span is populated by script.js (setYear()) so the copyright
+       year updates automatically each year without any manual edits.
+  ──────────────────────────────────────────────────────────────────────── -->
   <footer class="footer">
     <p>&copy; <span id="year"></span> dcbgi. Built with HTML, CSS &amp; JS.</p>
   </footer>
 
+  <!-- script.js is loaded at the end of <body> so the DOM elements it queries
+       (#projects-grid, #year) are guaranteed to exist when the script runs.
+       It also registers a DOMContentLoaded listener as a secondary safety net. -->
   <script src="script.js"></script>
 </body>
 </html>

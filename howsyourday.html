@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>How's Your Day? – dcbgi</title>
+  <!-- ── Styles ──────────────────────────────────────────────────────────────
+       All CSS for this page is inlined here (no external stylesheet) so the
+       file is fully self-contained and can be opened without a server.
+       Design tokens (CSS custom properties) match index.html / styles.css so
+       the visual language stays consistent across the whole site.
+  ──────────────────────────────────────────────────────────────────────── -->
   <style>
     /* ── Reset & Base ──────────────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -179,13 +185,23 @@
 </head>
 <body>
 
-  <!-- Navbar -->
+  <!-- ── Navbar ──────────────────────────────────────────────────────────────
+       Sticky top bar with the site logo and a back link to the portfolio.
+       Using aria-label on the <nav> helps screen readers announce the
+       landmark region correctly.
+  ──────────────────────────────────────────────────────────────────────── -->
   <nav class="navbar" aria-label="Site navigation">
     <a href="index.html" class="nav-logo">Berry Better Solutions</a>
     <a href="index.html" class="nav-back">← Back to Portfolio</a>
   </nav>
 
-  <!-- Main content -->
+  <!-- ── Main content ────────────────────────────────────────────────────────
+       The main area contains the heading and the grid of mood buttons.
+       Each button carries two data-* attributes:
+         data-emoji  — the emoji character to display in the overlay
+         data-label  — the mood description shown below the emoji
+       The script below reads these attributes when a button is clicked.
+  ──────────────────────────────────────────────────────────────────────── -->
   <main>
     <h1 class="question">How's your <span>day</span>?</h1>
 
@@ -213,7 +229,13 @@
     </div>
   </main>
 
-  <!-- Emoji overlay (hidden by default) -->
+  <!-- ── Emoji overlay ────────────────────────────────────────────────────────
+       Hidden full-screen overlay (opacity: 0; pointer-events: none by default).
+       When a mood button is clicked, the JS adds the "visible" class which
+       fades it in and re-enables pointer events.
+       role="dialog" + aria-modal="true" signals to screen readers that this
+       is a modal interaction; aria-label gives it an accessible name.
+  ──────────────────────────────────────────────────────────────────────── -->
   <div class="emoji-overlay" id="emoji-overlay" role="dialog" aria-modal="true" aria-label="Mood response">
     <div class="overlay-emoji" id="overlay-emoji" aria-hidden="true"></div>
     <div class="overlay-label" id="overlay-label"></div>
@@ -225,35 +247,50 @@
   </footer>
 
   <script>
-    // ── Mood button click → show overlay ─────────────────────────────────────
+    // ── Element references ───────────────────────────────────────────────────
+    // Cache the overlay container and its inner parts so we don't query the DOM
+    // on every button click.
     const overlay      = document.getElementById("emoji-overlay");
-    let   overlayEmoji = document.getElementById("overlay-emoji");
+    let   overlayEmoji = document.getElementById("overlay-emoji"); // `let` because we replace this node
     const overlayLabel = document.getElementById("overlay-label");
 
+    // ── Mood button click → show overlay ─────────────────────────────────────
+    // Attach a click listener to every .mood-btn button.
+    // When one is clicked, we read its data-emoji and data-label attributes,
+    // update the overlay content, and make it visible.
     document.querySelectorAll(".mood-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const emoji = btn.dataset.emoji;
         const label = btn.dataset.label;
 
-        // Reset animation by cloning the emoji element then reassigning the reference
+        // Reset the CSS pop animation by cloning the emoji element.
+        // Simply changing textContent won't restart a running animation;
+        // replacing the node forces the browser to treat it as brand-new,
+        // which re-triggers the @keyframes pop animation from the beginning.
         const clonedEmoji = overlayEmoji.cloneNode(true);
         clonedEmoji.textContent = emoji;
         overlayEmoji.replaceWith(clonedEmoji);
+        // Update the module-level reference so future clicks still work
         overlayEmoji = clonedEmoji;
 
         overlayLabel.textContent = label;
+        // Adding "visible" transitions opacity to 1 and re-enables pointer events
         overlay.classList.add("visible");
-        overlay.focus();
+        overlay.focus(); // Move focus into the overlay for keyboard/screen-reader users
       });
     });
 
     // ── Close overlay on click or Escape key ─────────────────────────────────
+    // Clicking anywhere on the semi-transparent overlay background closes it.
     overlay.addEventListener("click", () => overlay.classList.remove("visible"));
+    // Keyboard users can also dismiss the overlay with the Escape key.
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") overlay.classList.remove("visible");
     });
 
     // ── Footer year ───────────────────────────────────────────────────────────
+    // Stamp the current four-digit year into the footer copyright notice so it
+    // stays accurate without manual updates.
     const yearEl = document.getElementById("year");
     if (yearEl) yearEl.textContent = new Date().getFullYear();
   </script>
