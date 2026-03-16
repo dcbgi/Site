@@ -1,54 +1,13 @@
-/* ===========================
-   Reset & Base
-   Removes browser default margin/padding on every element (including
-   pseudo-elements) so layout behaves consistently across browsers.
-   box-sizing: border-box makes width/height include padding and border,
-   which simplifies layout math.
-   =========================== */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* ── styles.css ──────────────────────────────────────────────────────────────
+   Layout, components, and styles for the main portfolio page (index.html).
+   shared.css (loaded first) provides the design tokens, reset, and base
+   body / link styles used across every page — do not duplicate them here.
+   ──────────────────────────────────────────────────────────────────────────── */
 
-/* ── CSS Custom Properties (design tokens) ──
-   Defining colours, radii, and timing as variables means you only need to
-   change a value in one place to update it across the entire stylesheet. */
+/* ── index.html-specific design token overrides ─────────────────────────────── */
+/* The main page uses a slightly longer transition than the sub-app pages. */
 :root {
-  --bg:        #0f1117;   /* Page background — near-black dark blue */
-  --surface:   #1a1d27;   /* Card / panel background — slightly lighter */
-  --border:    #2a2d3a;   /* Subtle dividers and card outlines */
-  --accent:    #7c6af7;   /* Primary brand colour — purple */
-  --accent-lt: #a899ff;   /* Lighter purple used for links and hover states */
-  --text:      #e2e4f0;   /* Primary body text — off-white */
-  --text-muted:#8b8fa8;   /* Secondary / helper text — muted grey-blue */
-  --radius:    12px;      /* Consistent corner radius for cards */
-  --shadow:    0 4px 24px rgba(0,0,0,.4); /* Elevation shadow used on card hover */
-  --transition:0.25s ease; /* Shared duration + easing for interactive transitions */
-}
-
-/* Smooth scrolling for anchor-link navigation (e.g. clicking "About" in the navbar) */
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  background-color: var(--bg);
-  color: var(--text);
-  /* System font stack: Segoe UI on Windows, system-ui elsewhere, with Apple fallback */
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  line-height: 1.6; /* Comfortable reading line height */
-}
-
-/* Global link defaults — accent colour with no underline */
-a {
-  color: var(--accent-lt);
-  text-decoration: none;
-}
-
-/* Brighten links on hover to indicate interactivity */
-a:hover {
-  color: #fff;
+  --transition: 0.25s ease; /* Slightly slower transition for this page's hover effects */
 }
 
 /* ===========================
@@ -90,28 +49,13 @@ a:hover {
 
 /* ===========================
    Navbar
-   Sticky top bar that stays visible while scrolling.
+   shared.css provides the base navbar layout; override only the background
+   opacity which differs slightly on the main page (more transparent frosted glass).
+   The .nav-links list is unique to this page.
    =========================== */
+/* Slightly more transparent glass effect than the sub-app pages */
 .navbar {
-  position: sticky;  /* Stays fixed to the top of the viewport as the user scrolls */
-  top: 0;
-  z-index: 100;      /* Renders above all page content */
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 2rem;
-  /* Semi-transparent dark background — the blur below creates a frosted-glass effect */
   background: rgba(15,17,23,.85);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
-}
-
-/* Brand name / home link in the navbar */
-.nav-logo {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--accent-lt);
-  letter-spacing: .05em;
 }
 
 /* Horizontal list of navigation anchor links */

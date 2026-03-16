@@ -107,6 +107,122 @@ describe(".cpanel.yml deployment", () => {
       expect(cpanelContent).toMatch(new RegExp("/bin/cp.*\\b" + demoFile + "\\b"));
     });
   });
+
+  // Each demo HTML file has a companion .css and .js file that must also be deployed
+  const companionFiles = localDemos.flatMap((f) => {
+    const base = f.replace(/\.html$/, "");
+    return [`${base}.css`, `${base}.js`];
+  });
+
+  companionFiles.forEach((file) => {
+    test(`deploys companion file ${file} via a copy command`, () => {
+      expect(cpanelContent).toMatch(new RegExp("/bin/cp.*\\b" + file + "\\b"));
+    });
+  });
+
+  test("deploys shared.css via a copy command", () => {
+    expect(cpanelContent).toMatch(/\/bin\/cp.*\bshared\.css\b/);
+  });
+});
+
+// ─── External CSS / JS references ────────────────────────────────────────────
+// After extracting inline styles and scripts to separate files, each HTML page
+// must reference those files via <link> and <script src="..."> tags.
+
+describe("index.html external assets", () => {
+  let doc;
+
+  beforeAll(() => {
+    const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+    doc = new DOMParser().parseFromString(html, "text/html");
+  });
+
+  test("links shared.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("shared.css");
+  });
+
+  test("links styles.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("styles.css");
+  });
+
+  test("shared.css is linked before styles.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links.indexOf("shared.css")).toBeLessThan(links.indexOf("styles.css"));
+  });
+
+  test("has no inline <style> block", () => {
+    expect(doc.querySelectorAll("style").length).toBe(0);
+  });
+});
+
+describe("howsyourday.html external assets", () => {
+  let doc;
+
+  beforeAll(() => {
+    const html = fs.readFileSync(path.join(__dirname, "..", "howsyourday.html"), "utf8");
+    doc = new DOMParser().parseFromString(html, "text/html");
+  });
+
+  test("links shared.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("shared.css");
+  });
+
+  test("links howsyourday.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("howsyourday.css");
+  });
+
+  test("loads howsyourday.js via <script src>", () => {
+    const scripts = [...doc.querySelectorAll("script[src]")].map((s) => s.getAttribute("src"));
+    expect(scripts).toContain("howsyourday.js");
+  });
+
+  test("has no inline <style> block", () => {
+    expect(doc.querySelectorAll("style").length).toBe(0);
+  });
+
+  test("has no inline <script> block", () => {
+    // Inline scripts have no src attribute
+    const inlineScripts = [...doc.querySelectorAll("script")].filter((s) => !s.getAttribute("src"));
+    expect(inlineScripts.length).toBe(0);
+  });
+});
+
+describe("tvtracker.html external assets", () => {
+  let doc;
+
+  beforeAll(() => {
+    const html = fs.readFileSync(path.join(__dirname, "..", "tvtracker.html"), "utf8");
+    doc = new DOMParser().parseFromString(html, "text/html");
+  });
+
+  test("links shared.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("shared.css");
+  });
+
+  test("links tvtracker.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("tvtracker.css");
+  });
+
+  test("loads tvtracker.js via <script src>", () => {
+    const scripts = [...doc.querySelectorAll("script[src]")].map((s) => s.getAttribute("src"));
+    expect(scripts).toContain("tvtracker.js");
+  });
+
+  test("has no inline <style> block", () => {
+    expect(doc.querySelectorAll("style").length).toBe(0);
+  });
+
+  test("has no inline <script> block", () => {
+    // Inline scripts have no src attribute
+    const inlineScripts = [...doc.querySelectorAll("script")].filter((s) => !s.getAttribute("src"));
+    expect(inlineScripts.length).toBe(0);
+  });
 });
 
 // ─── escapeHtml ───────────────────────────────────────────────────────────────
