@@ -8,9 +8,10 @@ A personal portfolio website that showcases projects I've built. The entire site
 
 1. [Project Structure](#project-structure)
 2. [How the Code Works Together](#how-the-code-works-together)
+   - [Shared Design System](#shared-design-system-sharedcss)
    - [Main Portfolio Page](#main-portfolio-page-indexhtml--stylescsss--scriptjs)
-   - [TV Show Tracker](#tv-show-tracker-tvtrackerhtml)
-   - [How's Your Day?](#hows-your-day-howsyourdayhtml)
+   - [TV Show Tracker](#tv-show-tracker-tvtrackerhtml--tvtrackercss--tvtrackerjs)
+   - [How's Your Day?](#hows-your-day-howsyourdayhtml--howsyourdaycss--howsyourdayjs)
 3. [Adding a New Project](#adding-a-new-project)
 4. [Running Locally](#running-locally)
 5. [Testing](#testing)
@@ -22,17 +23,43 @@ A personal portfolio website that showcases projects I've built. The entire site
 
 | File | Purpose |
 |------|---------|
+| `shared.css` | Design tokens (CSS variables), reset, base body/link styles, and shared navbar — loaded first by every page |
 | `index.html` | Main portfolio page — hero/about section, projects grid, contact section |
-| `styles.css` | All layout, colour, and responsive styles for `index.html` |
+| `styles.css` | Layout, components, and styles specific to `index.html` |
 | `script.js` | Project data array + functions to render cards and set the footer year |
-| `tvtracker.html` | Self-contained TV show tracker app (HTML + CSS + JS in one file) |
-| `howsyourday.html` | Self-contained mood-check mini-app (HTML + CSS + JS in one file) |
-| `tests/projects.test.js` | Jest tests for project data schema and rendering logic |
+| `tvtracker.html` | TV show tracker app |
+| `tvtracker.css` | Page-specific styles for `tvtracker.html` (app tokens, layout, components) |
+| `tvtracker.js` | TV show tracker logic (localStorage, rendering, event handling) |
+| `howsyourday.html` | Mood-check mini-app |
+| `howsyourday.css` | Page-specific styles for `howsyourday.html` (mood buttons, overlay, animations) |
+| `howsyourday.js` | Mood-check logic (mood button clicks, overlay show/hide, keyboard handling) |
+| `tests/projects.test.js` | Jest tests for project data schema, rendering logic, and deployment config |
 | `.cpanel.yml` | Deployment instructions for cPanel Git Version Control |
 
 ---
 
 ## How the Code Works Together
+
+### Shared Design System (`shared.css`)
+
+`shared.css` is the single source of truth for design tokens and base styles. It is loaded first by **every** HTML page, ensuring a consistent look and feel across the site without duplicating variables.
+
+```
+shared.css
+  ├── CSS custom properties (:root)
+  │     --bg, --surface, --surface2, --border,
+  │     --accent, --accent-lt, --text, --text-muted,
+  │     --radius, --shadow, --transition
+  │
+  ├── Reset (*, *::before, *::after box-sizing / margin / padding)
+  ├── Base body styles (background, color, font-family, line-height)
+  ├── Global link styles (a, a:hover)
+  └── Shared navbar layout (.navbar, .nav-logo)
+```
+
+Each page then loads its own stylesheet on top of `shared.css` for page-specific layout and components.
+
+---
 
 ### Main Portfolio Page (`index.html` + `styles.css` + `script.js`)
 
@@ -41,9 +68,12 @@ These three files form the main portfolio page and are tightly coupled:
 ```
 Browser loads index.html
   │
+  ├── <link rel="stylesheet" href="shared.css" />
+  │     └── Design tokens, reset, base styles, shared navbar
+  │
   ├── <link rel="stylesheet" href="styles.css" />
-  │     └── Applies the dark theme, layout, and all component styles
-  │           (navbar, hero, project grid, contact section, footer)
+  │     └── Main-page layout and components
+  │           (hero, project grid, contact section, footer, responsive rules)
   │
   └── <script src="script.js"></script>  (at bottom of <body>)
         │
@@ -66,21 +96,23 @@ Browser loads index.html
               • Calls renderProjects() and setYear() once the DOM is ready
 ```
 
-**Data flow:** The only place you ever edit to add or change a project is the `projects` array in `script.js`. On page load the browser parses `index.html`, applies `styles.css`, then executes `script.js` which dynamically fills in the `#projects-grid` container that is left empty in the HTML.
+**Data flow:** The only place you ever edit to add or change a project is the `projects` array in `script.js`. On page load the browser parses `index.html`, applies `shared.css` then `styles.css`, then executes `script.js` which dynamically fills in the `#projects-grid` container that is left empty in the HTML.
 
 ---
 
-### TV Show Tracker (`tvtracker.html`)
-
-A fully self-contained single-file app. All CSS and JavaScript live inside the file alongside the HTML.
+### TV Show Tracker (`tvtracker.html` + `tvtracker.css` + `tvtracker.js`)
 
 ```
-tvtracker.html
+Browser loads tvtracker.html
   │
-  ├── <style> … </style>
-  │     └── Inlined CSS (same design tokens as styles.css for visual consistency)
+  ├── <link rel="stylesheet" href="shared.css" />
+  │     └── Design tokens, reset, base styles, shared navbar
   │
-  └── <script> … </script>  (IIFE — Immediately Invoked Function Expression)
+  ├── <link rel="stylesheet" href="tvtracker.css" />
+  │     └── App-specific tokens (--danger, --success, --star), layout,
+  │           panels, buttons, show cards, episode list, star rating, footer
+  │
+  └── <script src="tvtracker.js"></script>  (IIFE — Immediately Invoked Function Expression)
         │
         ├── localStorage  ─────────────────────── Persistence layer
         │     • STORAGE_KEY = "tvtracker_shows"
@@ -103,70 +135,52 @@ tvtracker.html
         │
         ├── showCardHtml(show)
         │     • Builds the complete HTML string for one collapsible show card
-        │       (header, episode list, log-episode form, action buttons)
-        │     • Every user-supplied string is passed through esc() before
-        │       being inserted into innerHTML
+        │     • Every user-supplied string is passed through esc() before innerHTML
         │
         ├── render()
         │     • Splits shows[] into watching / completed lists
-        │     • Updates badge counts in the panel headers
-        │     • Calls showCardHtml() for each show and injects into the DOM
+        │     • Updates badge counts and re-renders card lists
         │     • Called after every state mutation
-        │
-        ├── findShow(id)  — looks up a show object by its ID
         │
         ├── Event delegation (single document click listener)
         │     • Identifies the clicked element with closest() and data-show-id
-        │     • Routes to the appropriate action:
-        │         toggle card  │  toggle log form  │  cancel form
-        │         star select  │  log episode      │  delete episode
-        │         mark complete │ move to watching  │  delete show
+        │     • Routes to: toggle card │ toggle log form │ star select │
+        │                  log episode │ delete episode │ mark complete │
+        │                  move to watching │ delete show
         │
         ├── Add-show form submit listener
-        │     • Creates a new show object with genId(), pushes it to shows[]
-        │     • Saves to localStorage, re-renders, scrolls new card into view
+        │     • Creates a new show object, saves, re-renders, scrolls card into view
         │
         └── Initial render() call — populates the UI from localStorage on load
 ```
 
-**Data flow:** The `shows` array is the single source of truth. Every user action modifies this array, calls `saveShows()` to persist it, then calls `render()` to rebuild the DOM from the updated state. Nothing in the DOM is mutated directly (except star highlight toggling, which avoids a full re-render to preserve form field values).
-
 ---
 
-### How's Your Day? (`howsyourday.html`)
-
-A fully self-contained single-file mini-app.
+### How's Your Day? (`howsyourday.html` + `howsyourday.css` + `howsyourday.js`)
 
 ```
-howsyourday.html
+Browser loads howsyourday.html
   │
-  ├── <style> … </style>
-  │     └── Inlined CSS (same design tokens as styles.css)
+  ├── <link rel="stylesheet" href="shared.css" />
+  │     └── Design tokens, reset, base styles, shared navbar
   │
-  ├── HTML structure
-  │     • .mood-buttons — row of 5 <button> elements, each carrying:
-  │         data-emoji  — the emoji to display (e.g. "🤩")
-  │         data-label  — the mood label (e.g. "Amazing!")
-  │     • #emoji-overlay — full-screen overlay (hidden by default)
-  │         #overlay-emoji — large emoji element (animated via @keyframes pop)
-  │         #overlay-label — mood label text (animated via @keyframes fadein)
+  ├── <link rel="stylesheet" href="howsyourday.css" />
+  │     └── Layout (flex column body), mood buttons, emoji overlay,
+  │           animations (@keyframes pop, fadein), footer
   │
-  └── <script> … </script>
+  └── <script src="howsyourday.js"></script>
         │
         ├── Mood button click listener (forEach on .mood-btn)
         │     1. Reads data-emoji and data-label from the clicked button
-        │     2. Clones the #overlay-emoji node to reset the CSS animation
-        │        (replacing the node forces the browser to restart @keyframes pop)
-        │     3. Sets the cloned node's text to the chosen emoji
-        │     4. Sets #overlay-label text to the mood label
-        │     5. Adds class "visible" to #emoji-overlay → fades it in
-        │     6. Moves focus to the overlay for keyboard/screen-reader users
+        │     2. Clones the #overlay-emoji node to restart the CSS animation
+        │     3. Updates overlay content and adds class "visible"
+        │     4. Moves focus to the overlay for keyboard/screen-reader users
         │
         ├── Overlay close handlers
         │     • Click anywhere on overlay → removes "visible" class
         │     • Keydown "Escape"          → removes "visible" class
         │
-        └── Footer year stamp (same pattern as script.js setYear())
+        └── Footer year stamp
 ```
 
 ---
@@ -235,5 +249,5 @@ This repository includes a `.cpanel.yml` file that enables automatic deployment 
 - Push commits to the linked branch, then click **Update** followed by **Deploy HEAD Commit** in cPanel, or
 - Use the **Deploy HEAD Commit** button at any time to manually trigger a deployment.
 
-Files deployed to `public_html`: `index.html`, `styles.css`, `script.js`, `tvtracker.html`, `howsyourday.html`.
+Files deployed to `public_html`: `shared.css`, `index.html`, `styles.css`, `script.js`, `tvtracker.html`, `tvtracker.css`, `tvtracker.js`, `howsyourday.html`, `howsyourday.css`, `howsyourday.js`.
 

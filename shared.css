@@ -1,0 +1,89 @@
+/* ── shared.css ──────────────────────────────────────────────────────────────
+   Design tokens and base styles shared across all pages of the site.
+   Every HTML page links this stylesheet before its own page-specific CSS so
+   that colours, spacing, and resets are consistent site-wide.
+   To retheme the entire site, edit the :root variables here.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ── Reset ─────────────────────────────────────────────────────────────────── */
+/* Removes browser default margin/padding on every element (including
+   pseudo-elements) so layout behaves consistently across browsers.
+   box-sizing: border-box makes width/height include padding and border. */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Design Tokens (CSS Custom Properties) ─────────────────────────────────── */
+/* Defining colours, radii, and timing as variables means you only need to
+   change a value in one place to update it across every page. */
+:root {
+  --bg:        #0f1117;   /* Page background — near-black dark blue           */
+  --surface:   #1a1d27;   /* Card / panel background — slightly lighter       */
+  --surface2:  #22263a;   /* Deeper panel background for nested UI elements   */
+  --border:    #2a2d3a;   /* Subtle dividers and card outlines                */
+  --accent:    #7c6af7;   /* Primary brand colour — purple                    */
+  --accent-lt: #a899ff;   /* Lighter purple used for links and hover states   */
+  --text:      #e2e4f0;   /* Primary body text — off-white                    */
+  --text-muted:#8b8fa8;   /* Secondary / helper text — muted grey-blue        */
+  --radius:    12px;      /* Consistent corner radius for cards               */
+  --shadow:    0 4px 24px rgba(0,0,0,.4); /* Elevation shadow for card hover  */
+  --transition:0.2s ease; /* Shared duration + easing for interactive transitions */
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────────── */
+/* Smooth scrolling for anchor-link navigation (e.g. clicking a navbar link) */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  /* System font stack: Segoe UI on Windows, system-ui elsewhere, with Apple fallback */
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+}
+
+/* Global link defaults — accent colour with no underline */
+a {
+  color: var(--accent-lt);
+  text-decoration: none;
+}
+
+/* Brighten links on hover to indicate interactivity */
+a:hover {
+  color: #fff;
+}
+
+/* ── Navbar ─────────────────────────────────────────────────────────────────── */
+/* Sticky top bar that stays visible while scrolling. Shared layout across
+   all pages; each page may add its own nav-specific link styles on top. */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: rgba(15,17,23,.9);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Brand name / home link in the navbar */
+.nav-logo {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--accent-lt);
+  letter-spacing: .05em;
+}
+
+/* Responsive: tighten navbar padding on small screens */
+@media (max-width: 600px) {
+  .navbar {
+    padding: 0.85rem 1.25rem;
+  }
+}

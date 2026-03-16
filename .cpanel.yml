@@ -2,8 +2,13 @@
 deployment:
   tasks:
     - export DEPLOYPATH=$HOME/public_html/
+    - /bin/cp -v shared.css $DEPLOYPATH
     - /bin/cp -v index.html $DEPLOYPATH
     - /bin/cp -v styles.css $DEPLOYPATH
     - /bin/cp -v script.js $DEPLOYPATH
     - /bin/cp -v tvtracker.html $DEPLOYPATH
+    - /bin/cp -v tvtracker.css $DEPLOYPATH
+    - /bin/cp -v tvtracker.js $DEPLOYPATH
     - /bin/cp -v howsyourday.html $DEPLOYPATH
+    - /bin/cp -v howsyourday.css $DEPLOYPATH
+    - /bin/cp -v howsyourday.js $DEPLOYPATH
