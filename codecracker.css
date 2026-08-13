@@ -1,0 +1,307 @@
+/* ── codecracker.css ──────────────────────────────────────────────────────────
+   Page-specific styles for codecracker.html.
+   shared.css (loaded first) provides design tokens, the reset, base body /
+   link styles, and the shared navbar; this file only adds the layout and
+   components unique to this page.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ── Layout ─────────────────────────────────────────────────────────────────── */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-back {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+.nav-back:hover { color: var(--text); }
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1.5rem 3rem;
+}
+
+.page-header { text-align: center; margin-bottom: 1.5rem; }
+.page-header h1 {
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 800;
+  margin-bottom: 0.3rem;
+}
+.page-header p { color: var(--text-muted); font-size: 1rem; }
+
+/* ── Board ──────────────────────────────────────────────────────────────────── */
+#board {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.attempt-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.row-label {
+  width: 28px;
+  text-align: right;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.pegs {
+  display: flex;
+  gap: 10px;
+}
+
+.peg {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: transform 0.1s, border-color var(--transition);
+}
+
+.peg.filled {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.peg.active-slot {
+  border-color: var(--accent-lt);
+  box-shadow: 0 0 8px rgba(124, 106, 247, 0.6);
+}
+
+.peg:hover.active-slot {
+  transform: scale(1.08);
+}
+
+/* Feedback mini-pegs */
+.feedback {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+  width: 40px;
+}
+
+.fb-peg {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--border);
+}
+
+.fb-peg.correct-pos {
+  background: #2ecc71;
+  border-color: #27ae60;
+}
+
+.fb-peg.correct-color {
+  background: #f1c40f;
+  border-color: #d4ac0d;
+}
+
+/* ── Colour Palette ─────────────────────────────────────────────────────────── */
+#palette-section {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.palette-heading {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+#palette {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.color-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.color-btn:hover {
+  transform: scale(1.12);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.color-btn.selected {
+  border-color: #fff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  transform: scale(1.12);
+}
+
+/* ── Controls ───────────────────────────────────────────────────────────────── */
+#controls {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity var(--transition), transform 0.1s;
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.btn-accent {
+  background: var(--accent-lt);
+  color: var(--bg);
+}
+
+/* ── Message ────────────────────────────────────────────────────────────────── */
+#message {
+  min-height: 50px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  max-width: 380px;
+}
+
+#message.win {
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+  border: 2px solid #2ecc71;
+}
+
+#message.lose {
+  background: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+  border: 2px solid #e74c3c;
+}
+
+/* ── Secret reveal ──────────────────────────────────────────────────────────── */
+#secret-reveal {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 12px;
+  gap: 8px;
+}
+
+#secret-reveal.visible {
+  display: flex;
+}
+
+#secret-reveal p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+#secret-pegs {
+  display: flex;
+  gap: 10px;
+}
+
+.secret-peg {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ── Instructions ───────────────────────────────────────────────────────────── */
+#instructions {
+  margin-top: 28px;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+#instructions h3 {
+  color: var(--accent-lt);
+  margin-bottom: 8px;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.legend-dot.green { background: #2ecc71; }
+.legend-dot.yellow { background: #f1c40f; }
+
+/* ── Footer ─────────────────────────────────────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 1.2rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .peg { width: 46px; height: 46px; }
+  .color-btn { width: 44px; height: 44px; }
+}

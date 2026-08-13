@@ -12,3 +12,6 @@ deployment:
     - /bin/cp -v howsyourday.html $DEPLOYPATH
     - /bin/cp -v howsyourday.css $DEPLOYPATH
     - /bin/cp -v howsyourday.js $DEPLOYPATH
+    - /bin/cp -v codecracker.html $DEPLOYPATH
+    - /bin/cp -v codecracker.css $DEPLOYPATH
+    - /bin/cp -v codecracker.js $DEPLOYPATH

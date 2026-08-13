@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Cracker – dcbgi</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="stylesheet" href="codecracker.css" />
+</head>
+<body>
+
+  <nav class="navbar" aria-label="Site navigation">
+    <a href="index.html" class="nav-logo">Berry Better Solutions</a>
+    <a href="index.html" class="nav-back">← Back to Portfolio</a>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <h1>🔐 Code<span class="accent">Cracker</span></h1>
+      <p>Break the secret 4-colour code in 7 attempts!</p>
+    </div>
+
+    <div id="board" role="grid" aria-label="Game board"></div>
+
+    <section id="palette-section" aria-label="Colour palette">
+      <h2 class="palette-heading">Choose a colour</h2>
+      <div id="palette" role="toolbar" aria-label="Available colours"></div>
+    </section>
+
+    <div id="controls">
+      <button id="btn-submit" class="btn btn-primary" disabled aria-label="Submit guess">Submit</button>
+      <button id="btn-clear" class="btn btn-secondary" aria-label="Clear current row">Clear Row</button>
+      <button id="btn-new-game" class="btn btn-accent" aria-label="Start a new game">New Game</button>
+    </div>
+
+    <div id="message" role="status" aria-live="polite">Attempt 1 of 7</div>
+
+    <div id="secret-reveal" aria-label="Secret code">
+      <p>The secret code</p>
+      <div id="secret-pegs"></div>
+    </div>
+
+    <aside id="instructions">
+      <h3>How to Play</h3>
+      <p>
+        A secret 4-colour code has been generated. Use the palette to select
+        colours and fill each slot, then hit <strong>Submit</strong>.
+        After each guess you'll receive feedback:
+      </p>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-dot green"></div>
+          <span>Right colour, right position</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot yellow"></div>
+          <span>Right colour, wrong position</span>
+        </div>
+      </div>
+      <p style="margin-top:8px;">Duplicate colours are allowed. You have 7 attempts. Good luck!</p>
+    </aside>
+  </main>
+
+  <footer>
+    <p>&copy; <span id="year"></span> dcbgi. Code Cracker — a colour-code guessing game.</p>
+  </footer>
+
+  <script src="codecracker.js"></script>
+</body>
+</html>

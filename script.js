@@ -49,6 +49,15 @@ const projects = [
     // demo is a relative path — served from the same origin as index.html
     demo: "howsyourday.html",
   },
+  {
+    title: "Code Cracker",
+    icon: "🔐",
+    desc: "Break a secret four-colour code in seven attempts using positional and colour feedback after each guess.",
+    tags: ["HTML", "CSS", "JavaScript", "Game"],
+    github: "https://github.com/dcbgi/CodeCracker",
+    // demo is a relative path — served from the same origin as index.html
+    demo: "codecracker.html",
+  },
   // ── Add more projects below ──
   // {
   //   title: "My Next Project",

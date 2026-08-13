@@ -225,6 +225,94 @@ describe("tvtracker.html external assets", () => {
   });
 });
 
+describe("codecracker.html external assets", () => {
+  let doc;
+
+  beforeAll(() => {
+    const html = fs.readFileSync(path.join(__dirname, "..", "codecracker.html"), "utf8");
+    doc = new DOMParser().parseFromString(html, "text/html");
+  });
+
+  test("links shared.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("shared.css");
+  });
+
+  test("links codecracker.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("codecracker.css");
+  });
+
+  test("loads codecracker.js via <script src>", () => {
+    const scripts = [...doc.querySelectorAll("script[src]")].map((s) => s.getAttribute("src"));
+    expect(scripts).toContain("codecracker.js");
+  });
+
+  test("has no inline <style> block", () => {
+    expect(doc.querySelectorAll("style").length).toBe(0);
+  });
+
+  test("has no inline <script> block", () => {
+    const inlineScripts = [...doc.querySelectorAll("script")].filter((s) => !s.getAttribute("src"));
+    expect(inlineScripts.length).toBe(0);
+  });
+});
+
+// ─── Navigation / routing ─────────────────────────────────────────────────────
+
+describe("sub-page back links point to index.html", () => {
+  const subPages = ["howsyourday.html", "tvtracker.html", "codecracker.html"];
+
+  subPages.forEach((page) => {
+    describe(page, () => {
+      let doc;
+
+      beforeAll(() => {
+        const html = fs.readFileSync(path.join(__dirname, "..", page), "utf8");
+        doc = new DOMParser().parseFromString(html, "text/html");
+      });
+
+      test("nav-logo links back to index.html", () => {
+        const logo = doc.querySelector(".nav-logo");
+        expect(logo).not.toBeNull();
+        expect(logo.getAttribute("href")).toBe("index.html");
+      });
+
+      test("nav-back link points to index.html", () => {
+        const back = doc.querySelector(".nav-back");
+        expect(back).not.toBeNull();
+        expect(back.getAttribute("href")).toBe("index.html");
+      });
+    });
+  });
+});
+
+describe("index.html links forward to every local demo page", () => {
+  let indexDoc;
+
+  beforeAll(() => {
+    document.body.innerHTML = '<div id="projects-grid"></div>';
+    renderProjects();
+    indexDoc = document;
+  });
+
+  const localDemos = projects
+    .filter((p) => p.demo && !p.demo.startsWith("https://"))
+    .map((p) => p.demo);
+
+  localDemos.forEach((demoFile) => {
+    test(`contains a link to ${demoFile}`, () => {
+      const links = [...indexDoc.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+      expect(links).toContain(demoFile);
+    });
+
+    test(`${demoFile} exists on disk`, () => {
+      const filePath = path.join(__dirname, "..", demoFile);
+      expect(fs.existsSync(filePath)).toBe(true);
+    });
+  });
+});
+
 // ─── escapeHtml ───────────────────────────────────────────────────────────────
 
 describe("escapeHtml", () => {
