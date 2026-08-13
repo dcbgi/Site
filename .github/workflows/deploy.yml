@@ -1,0 +1,38 @@
+name: Deploy to Nixihost
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H berrybettersolutions.com >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: |
+          ssh berrybet@berrybettersolutions.com << 'EOF'
+          cd /home/berrybet/repositories/Site
+          git pull origin main
+          export DEPLOYPATH=/home/berrybet/public_html/
+          /bin/cp -v shared.css $DEPLOYPATH
+          /bin/cp -v index.html $DEPLOYPATH
+          /bin/cp -v styles.css $DEPLOYPATH
+          /bin/cp -v script.js $DEPLOYPATH
+          /bin/cp -v tvtracker.html $DEPLOYPATH
+          /bin/cp -v tvtracker.css $DEPLOYPATH
+          /bin/cp -v tvtracker.js $DEPLOYPATH
+          /bin/cp -v howsyourday.html $DEPLOYPATH
+          /bin/cp -v howsyourday.css $DEPLOYPATH
+          /bin/cp -v howsyourday.js $DEPLOYPATH
+          /bin/cp -v codecracker.html $DEPLOYPATH
+          /bin/cp -v codecracker.css $DEPLOYPATH
+          /bin/cp -v codecracker.js $DEPLOYPATH
+          EOF
