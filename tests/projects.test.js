@@ -108,15 +108,16 @@ describe(".cpanel.yml deployment", () => {
     });
   });
 
-  // Each demo HTML file has a companion .css and .js file that must also be deployed
-  const companionFiles = localDemos.flatMap((f) => {
-    const base = f.replace(/\.html$/, "");
-    return [`${base}.css`, `${base}.js`];
-  });
+  // Each demo folder has companion style.css and script.js files
+  localDemos.forEach((demoFile) => {
+    const dir = demoFile.replace(/\/index\.html$/, "");
 
-  companionFiles.forEach((file) => {
-    test(`deploys companion file ${file} via a copy command`, () => {
-      expect(cpanelContent).toMatch(new RegExp("/bin/cp.*\\b" + file + "\\b"));
+    test(`deploys ${dir}/style.css`, () => {
+      expect(cpanelContent).toMatch(new RegExp("/bin/cp.*" + dir + "/style\\.css"));
+    });
+
+    test(`deploys ${dir}/script.js`, () => {
+      expect(cpanelContent).toMatch(new RegExp("/bin/cp.*" + dir + "/script\\.js"));
     });
   });
 
