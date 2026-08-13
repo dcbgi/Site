@@ -102,9 +102,12 @@ Browser loads index.html
 ### TV Show Tracker (`experiences/tvtracker/index.html` + `style.css` + `script.js`)
 
 A shared watch-log: anyone using the browser logs a row (username, show,
-season, episode, optional notes) and the table below is filterable by every
-column — e.g. pick one username to see everything they've logged, or a
-username **and** a show to narrow to just that pairing.
+season, episode, optional notes, optional star rating) and the table below
+is filterable by every column — e.g. pick one username to see everything
+they've logged, or a username **and** a show to narrow to just that pairing.
+Each row can also be marked "Completed" — this applies to the whole
+username+show pairing (not just that one episode), since every row sharing
+that pairing should agree on whether the show's been finished.
 
 ```
 Browser loads index.html
@@ -113,21 +116,25 @@ Browser loads index.html
   │     └── Design tokens, reset, base styles, shared navbar
   │
   ├── <link rel="stylesheet" href="style.css" />
-  │     └── App-specific tokens (--danger, --success), form/filter layout,
-  │           table styling, and a table→stacked-card layout under 640px
+  │     └── App-specific tokens (--danger, --success, --star), form/filter
+  │           layout, table styling, and a table→stacked-card layout under 640px
   │
   └── <script src="script.js"></script>  (IIFE — Immediately Invoked Function Expression)
         │
-        ├── localStorage  ─────────────────────── Persistence layer
-        │     • STORAGE_KEY = "tvtracker_records"
-        │     • loadRecords() — JSON.parse from localStorage on startup
-        │     • saveRecords() — JSON.stringify to localStorage after every change
+        ├── localStorage  ─────────────────────── Persistence layer (two keys)
+        │     • STORAGE_KEY        = "tvtracker_records"    — the log rows
+        │     • STORAGE_KEY_STATUS = "tvtracker_show_status" — completed pairs
+        │     • loadRecords()/saveRecords() and loadStatuses()/saveStatuses()
         │
         ├── State variables
-        │     • records[]  — flat array of { id, username, show, season,
-        │                     episode, notes, loggedAt }, one per logged watch
-        │     • filters{}  — active column filters (username/show/season/
-        │                     episode = exact match, notes = substring)
+        │     • records[]   — flat array of { id, username, show, season,
+        │                      episode, rating, notes, loggedAt }, one per watch
+        │     • statuses{}  — { "username␟show": "completed" }; a pairing with
+        │                      no entry is implicitly "watching"
+        │     • pendingRating — star value highlighted in the add form (0-5)
+        │     • filters{}   — active column filters (username/show/season/
+        │                      episode/rating = exact match, notes = substring,
+        │                      status = derived per-row via rowStatus())
         │
         ├── Helper functions
         │     • genId()          — generates a unique ID (timestamp + random suffix)
@@ -136,20 +143,33 @@ Browser loads index.html
         │     • uniqueSorted()    — distinct values of a field, for filter dropdowns
         │     • populateSelect()  — rebuilds a <select>'s options, keeping the
         │                           current selection if it still exists
+        │     • showKey() / rowStatus() / setCompleted() — key a (username, show)
+        │       pair, read its completed state, and toggle it for every row
+        │       that shares the pairing
+        │     • starsHtml() / ratingInputHtml() — read-only ★ display for table
+        │       cells vs. the 5 clickable star buttons in the add form
         │
         ├── refreshFilterOptions()
         │     • Rebuilds the username/show/season/episode dropdowns from the
         │       full record set — called after add/delete, not on every filter
-        │       interaction, so an in-progress filter selection isn't reset
+        │       interaction, so an in-progress filter selection isn't reset.
+        │       Rating/Status filters have a fixed option set, defined in HTML.
         │
         ├── renderTable()
         │     • Applies matchesFilters() to records[], sorts newest-first,
         │       renders rows (or an empty state) and updates the count badge
         │
         ├── Log-a-watch form submit listener
-        │     • Validates username/show/season/episode are present, notes stays
-        │       optional; pushes a new record, saves, re-renders, and clears
-        │       the form (keeping the username filled in for quick re-entry)
+        │     • Validates username/show/season/episode are present; notes and
+        │       rating stay optional; pushes a new record, saves, re-renders,
+        │       and clears the form (keeping the username filled in for quick
+        │       re-entry)
+        │
+        ├── Row actions (event delegation on the table body)
+        │     • toggle-status-btn flips the completed state for that row's
+        │       (username, show) pairing — every other row sharing it updates
+        │       on the next render
+        │     • delete-record-btn removes just that one row
         │
         ├── Filter listeners
         │     • change on each dropdown / input on the notes search box

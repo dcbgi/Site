@@ -44,6 +44,10 @@
           <label class="form-label" for="input-notes">Notes <span class="optional-tag">(optional)</span></label>
           <input class="form-input" type="text" id="input-notes" placeholder="Any thoughts on this episode…" maxlength="240" />
         </div>
+        <div class="form-field">
+          <span class="form-label">Rating <span class="optional-tag">(optional)</span></span>
+          <div class="stars" id="rating-input" role="radiogroup" aria-label="Episode rating"></div>
+        </div>
         <button type="submit" class="btn btn-primary" id="log-entry-submit">+ Log Entry</button>
       </form>
     </div>
@@ -83,6 +87,26 @@
           <label class="form-label" for="filter-notes">Notes contain</label>
           <input class="form-input" type="text" id="filter-notes" placeholder="Search notes…" />
         </div>
+        <div class="form-field form-field-sm">
+          <label class="form-label" for="filter-rating">Rating</label>
+          <select class="form-input" id="filter-rating">
+            <option value="">All</option>
+            <option value="0">Unrated</option>
+            <option value="1">★ 1</option>
+            <option value="2">★ 2</option>
+            <option value="3">★ 3</option>
+            <option value="4">★ 4</option>
+            <option value="5">★ 5</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="filter-status">Status</label>
+          <select class="form-input" id="filter-status">
+            <option value="">All</option>
+            <option value="watching">Watching</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
         <button type="button" class="btn btn-ghost btn-sm" id="clear-filters-btn">Clear Filters</button>
       </div>
 
@@ -94,7 +118,9 @@
               <th>Show</th>
               <th>Season</th>
               <th>Episode</th>
+              <th>Rating</th>
               <th>Notes</th>
+              <th>Status</th>
               <th>Logged</th>
               <th class="col-actions"></th>
             </tr>
