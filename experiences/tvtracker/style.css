@@ -123,16 +123,26 @@ main {
   color: var(--text-muted);
   font-size: 0.8rem;
   padding: 0.3rem 0.6rem;
+  border-radius: 8px;
 }
-.btn-danger:hover { color: var(--danger); }
+.btn-danger:hover {
+  color: var(--danger);
+  background: rgba(224,92,110,.12);
+  border-color: rgba(224,92,110,.3);
+}
 .btn-success {
   background: transparent;
   border: 1px solid var(--border);
   color: var(--text-muted);
   font-size: 0.8rem;
   padding: 0.3rem 0.7rem;
+  border-radius: 8px;
 }
-.btn-success:hover { border-color: var(--success); color: var(--success); }
+.btn-success:hover {
+  border-color: var(--success);
+  color: var(--success);
+  background: rgba(76,175,130,.12);
+}
 .btn-sm {
   font-size: 0.8rem;
   padding: 0.3rem 0.7rem;
@@ -147,11 +157,15 @@ main {
 .show-card {
   background: var(--surface);
   border: 1px solid var(--border);
+  border-left: 3px solid transparent;
   border-radius: var(--radius);
   overflow: hidden;
   width: 100%;
   max-width: 700px;
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
+.show-card:hover { border-color: var(--border); box-shadow: var(--shadow); }
+.show-card.open { border-left-color: var(--accent); }
 .show-header {
   display: flex;
   align-items: center;
@@ -168,6 +182,8 @@ main {
   align-items: center;
   gap: 0.75rem;
   min-width: 0;
+  flex-wrap: wrap;
+  row-gap: 0.3rem;
 }
 .show-title-text {
   font-weight: 700;
@@ -177,14 +193,22 @@ main {
   text-overflow: ellipsis;
 }
 .ep-count {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   white-space: nowrap;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 0.1rem 0.55rem;
 }
 .avg-rating {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--star);
   white-space: nowrap;
+  background: rgba(245,200,66,.12);
+  border: 1px solid rgba(245,200,66,.3);
+  border-radius: 20px;
+  padding: 0.1rem 0.55rem;
 }
 .show-header-right {
   display: flex;
@@ -217,11 +241,28 @@ main {
 .episode-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
   padding: 0.55rem 0.75rem;
   background: var(--surface2);
+  border: 1px solid transparent;
   border-radius: 8px;
   font-size: 0.9rem;
+  transition: border-color var(--transition);
+}
+.episode-row:hover { border-color: var(--border); }
+.ep-primary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1;
+}
+.ep-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
 }
 .ep-num {
   color: var(--accent-lt);
@@ -353,7 +394,20 @@ footer {
 
 /* ── Responsive ─────────────────────────────────────────────────────────────── */
 @media (max-width: 500px) {
+  main { padding: 2rem 1rem 3rem; }
+  .panel { padding: 1.25rem 1.25rem; }
   .add-show-form { flex-direction: column; }
+  .add-show-form button { width: 100%; }
   .form-input.ep-title-input { width: 100%; }
-  .log-form-fields { flex-direction: column; }
+  .log-form-fields { flex-direction: column; align-items: stretch; }
+  .show-title-text { white-space: normal; }
+
+  /* The episode row (number, title, stars, date, delete) is too wide for one
+     line on narrow phones. Stack it into two lines — title on top, the
+     rating/date/delete meta below — instead of letting the date get
+     squeezed off the edge. */
+  .episode-row { flex-wrap: wrap; row-gap: 0.4rem; }
+  .ep-primary { flex-basis: 100%; }
+  .ep-title { white-space: normal; }
+  .ep-meta { margin-left: auto; }
 }

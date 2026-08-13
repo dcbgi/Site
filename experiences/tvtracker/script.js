@@ -134,15 +134,19 @@
         // "Unrated", the date logged, and a delete button.
         episodesHtml +=
           '<div class="episode-row" data-ep-id="' + esc(ep.id) + '">' +
-            '<span class="ep-num">E' + esc(ep.number) + '</span>' +
-            '<span class="ep-title' + (ep.title ? "" : " untitled") + '">' +
-              (ep.title ? esc(ep.title) : "Untitled episode") +
-            "</span>" +
-            // Show star icons for rated episodes; plain text for unrated
-            (ep.rating > 0 ? starsHtml(ep.rating) : '<span style="color:var(--text-muted);font-size:0.8rem;">Unrated</span>') +
-            '<span class="ep-date">' + fmtDate(ep.loggedAt) + "</span>" +
-            // data-show-id and data-ep-id are read by the event delegation handler
-            '<button class="btn btn-danger delete-ep-btn" data-show-id="' + esc(show.id) + '" data-ep-id="' + esc(ep.id) + '" aria-label="Delete episode ' + esc(ep.number) + '">✕</button>' +
+            '<div class="ep-primary">' +
+              '<span class="ep-num">E' + esc(ep.number) + '</span>' +
+              '<span class="ep-title' + (ep.title ? "" : " untitled") + '">' +
+                (ep.title ? esc(ep.title) : "Untitled episode") +
+              "</span>" +
+            "</div>" +
+            '<div class="ep-meta">' +
+              // Show star icons for rated episodes; plain text for unrated
+              (ep.rating > 0 ? starsHtml(ep.rating) : '<span style="color:var(--text-muted);font-size:0.8rem;">Unrated</span>') +
+              '<span class="ep-date">' + fmtDate(ep.loggedAt) + "</span>" +
+              // data-show-id and data-ep-id are read by the event delegation handler
+              '<button class="btn btn-danger delete-ep-btn" data-show-id="' + esc(show.id) + '" data-ep-id="' + esc(ep.id) + '" aria-label="Delete episode ' + esc(ep.number) + '">✕</button>' +
+            "</div>" +
           "</div>";
       });
       episodesHtml += "</div>";

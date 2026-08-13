@@ -38,6 +38,15 @@ html {
   scroll-behavior: smooth;
 }
 
+/* overflow-x: hidden is a safety net — it stops any single oversized child
+   (a wide table, an unwrapped row of pegs, etc.) from stretching the whole
+   page horizontally on narrow viewports. Individual components should still
+   handle their own responsive sizing; this just prevents page-level scroll. */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
