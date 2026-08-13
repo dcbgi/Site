@@ -75,47 +75,33 @@ const projects = [
 // Called once on DOMContentLoaded. Safe to call again if the array changes
 // (e.g. in tests) — it fully replaces the grid innerHTML each time.
 function renderProjects() {
-  // Locate the grid container defined in index.html.
-  // Early-return if the element doesn't exist (e.g. running outside index.html).
   const grid = document.getElementById("projects-grid");
   if (!grid) return;
 
-  // When there are no projects, show a friendly placeholder instead of an
-  // empty grid so the section doesn't look broken.
   if (projects.length === 0) {
-    grid.innerHTML = `<p class="empty-state">No projects yet — check back soon!</p>`;
+    grid.innerHTML = `<p class="empty-state">No experiences yet — check back soon!</p>`;
     return;
   }
 
-  // Map each project object to an HTML string, then join and inject.
-  // All user-supplied strings are run through escapeHtml() to prevent XSS.
   grid.innerHTML = projects
-    .map(
-      (p) => `
-    <article class="project-card">
-      <div class="project-card-header">
-        <!-- Emoji icon is purely decorative; aria-hidden hides it from screen readers -->
-        <span class="project-icon" aria-hidden="true">${p.icon}</span>
-        <h3 class="project-title">${escapeHtml(p.title)}</h3>
-      </div>
-      <p class="project-desc">${escapeHtml(p.desc)}</p>
+    .map((p) => {
+      const href = p.demo || p.github || "#";
+      const isExternal = !p.demo;
+      const extraAttrs = isExternal ? ' target="_blank" rel="noopener noreferrer"' : "";
+      const codeOnlyClass = !p.demo ? " code-only" : "";
+
+      return `
+    <a href="${href}"${extraAttrs} class="experience-tile${codeOnlyClass}">
+      <span class="tile-icon" aria-hidden="true">${p.icon}</span>
+      <span class="tile-title">${escapeHtml(p.title)}</span>
+      <span class="tile-desc">${escapeHtml(p.desc)}</span>
       ${
-        // Render the tags row only when the project has at least one tag
         p.tags && p.tags.length
-          ? `<div class="project-tags">${p.tags.map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join("")}</div>`
+          ? `<span class="tile-tags">${p.tags.map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join("")}</span>`
           : ""
       }
-      ${
-        // Render the links row only when at least one link is present
-        p.github || p.demo
-          ? `<div class="project-links">
-              ${p.github ? `<a href="${p.github}" target="_blank" rel="noopener noreferrer" class="project-link">GitHub →</a>` : ""}
-              ${p.demo ? `<a href="${p.demo}" target="_blank" rel="noopener noreferrer" class="project-link">Live Demo →</a>` : ""}
-            </div>`
-          : ""
-      }
-    </article>`
-    )
+    </a>`;
+    })
     .join("");
 }
 

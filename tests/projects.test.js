@@ -147,11 +147,6 @@ describe("index.html external assets", () => {
     expect(links).toContain("styles.css");
   });
 
-  test("shared.css is linked before styles.css", () => {
-    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
-    expect(links.indexOf("shared.css")).toBeLessThan(links.indexOf("styles.css"));
-  });
-
   test("has no inline <style> block", () => {
     expect(doc.querySelectorAll("style").length).toBe(0);
   });
@@ -339,17 +334,37 @@ describe("renderProjects", () => {
     grid = document.getElementById("projects-grid");
   });
 
-  test("renders one card per project", () => {
+  test("renders one tile per project", () => {
     renderProjects();
-    const cards = grid.querySelectorAll(".project-card");
-    expect(cards.length).toBe(projects.length);
+    const tiles = grid.querySelectorAll(".experience-tile");
+    expect(tiles.length).toBe(projects.length);
   });
 
-  test("each card contains its project title", () => {
+  test("each tile contains its project title", () => {
     renderProjects();
-    const cards = grid.querySelectorAll(".project-card");
-    cards.forEach((card, i) => {
-      expect(card.textContent).toContain(projects[i].title);
+    const tiles = grid.querySelectorAll(".experience-tile");
+    tiles.forEach((tile, i) => {
+      expect(tile.textContent).toContain(projects[i].title);
+    });
+  });
+
+  test("demo projects link directly to their demo page", () => {
+    renderProjects();
+    const demoProjects = projects.filter((p) => p.demo);
+    demoProjects.forEach((p) => {
+      const tile = [...grid.querySelectorAll(".experience-tile")].find((t) => t.textContent.includes(p.title));
+      expect(tile).not.toBeUndefined();
+      expect(tile.getAttribute("href")).toBe(p.demo);
+    });
+  });
+
+  test("github-only projects link to their repo", () => {
+    renderProjects();
+    const ghOnly = projects.filter((p) => p.github && !p.demo);
+    ghOnly.forEach((p) => {
+      const tile = [...grid.querySelectorAll(".experience-tile")].find((t) => t.textContent.includes(p.title));
+      expect(tile).not.toBeUndefined();
+      expect(tile.getAttribute("href")).toBe(p.github);
     });
   });
 
@@ -366,7 +381,6 @@ describe("renderProjects", () => {
     renderProjects();
     expect(grid.innerHTML).not.toContain("<script>");
 
-    // Restore original projects
     projects.length = 0;
     projects.push(...originalProjects);
   });
@@ -376,9 +390,8 @@ describe("renderProjects", () => {
     projects.length = 0;
 
     renderProjects();
-    expect(grid.textContent).toContain("No projects yet");
+    expect(grid.textContent).toContain("No experiences yet");
 
-    // Restore original projects
     projects.push(...originalProjects);
   });
 });

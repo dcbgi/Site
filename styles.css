@@ -1,250 +1,111 @@
 /* ── styles.css ──────────────────────────────────────────────────────────────
-   Layout, components, and styles for the main portfolio page (index.html).
+   Layout and components for the "Choose Your Experience" hub (index.html).
    shared.css (loaded first) provides the design tokens, reset, and base
-   body / link styles used across every page — do not duplicate them here.
+   body / link styles used across every page.
    ──────────────────────────────────────────────────────────────────────────── */
 
-/* ── index.html-specific design token overrides ─────────────────────────────── */
-/* The main page uses a slightly longer transition than the sub-app pages. */
 :root {
-  --transition: 0.25s ease; /* Slightly slower transition for this page's hover effects */
+  --transition: 0.25s ease;
 }
 
-/* ===========================
-   Utility
-   Reusable helper classes shared across sections.
-   =========================== */
-
-/* Centres content and caps the max width, with horizontal padding on small screens */
-.container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-}
-
-/* Base button reset + shared sizing/cursor */
-.btn {
-  display: inline-block;
-  padding: 0.65rem 1.6rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  /* Animate background colour and a subtle lift on hover */
-  transition: background var(--transition), transform var(--transition);
-}
-
-/* Filled primary CTA button using the brand accent colour */
-.btn-primary {
-  background: var(--accent);
-  color: #fff;
-}
-
-/* Lighten the fill and lift the button slightly on hover */
-.btn-primary:hover {
-  background: var(--accent-lt);
-  color: #fff;
-  transform: translateY(-2px);
-}
-
-/* ===========================
-   Navbar
-   shared.css provides the base navbar layout; override only the background
-   opacity which differs slightly on the main page (more transparent frosted glass).
-   The .nav-links list is unique to this page.
-   =========================== */
-/* Slightly more transparent glass effect than the sub-app pages */
-.navbar {
-  background: rgba(15,17,23,.85);
-}
-
-/* Horizontal list of navigation anchor links */
-.nav-links {
-  list-style: none;
-  display: flex;
-  gap: 2rem;
-}
-
-/* Individual nav link styling — muted by default */
-.nav-links a {
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  transition: color var(--transition);
-}
-
-/* Brighten nav links on hover */
-.nav-links a:hover {
-  color: var(--text);
-}
-
-/* ===========================
-   Hero / About
-   Full-viewport-height introductory section centred vertically.
-   =========================== */
-.hero {
-  /* Subtract the navbar height (≈64 px) so the hero fills the remaining viewport */
+/* ── Hub layout ─────────────────────────────────────────────────────────────── */
+.hub {
   min-height: calc(100vh - 64px);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 4rem 1.5rem;
+  padding: 3rem 1.5rem;
+  gap: 1rem;
 }
 
-/* Constrain the hero copy width for comfortable reading */
-.hero-content {
-  max-width: 640px;
-}
-
-/* Circular avatar badge containing the initials "DC" */
-.avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  /* Gradient from brand purple to a soft pink */
-  background: linear-gradient(135deg, var(--accent), #c084fc);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #fff;
-  /* Subtle ring around the avatar using a border-like box-shadow */
-  box-shadow: 0 0 0 4px var(--border);
-}
-
-/* Responsive headline — scales fluidly from 2 rem on mobile to 3.5 rem on desktop */
-.hero-name {
-  font-size: clamp(2rem, 5vw, 3.5rem);
+.hub-heading {
+  font-size: clamp(2rem, 5vw, 3.2rem);
   font-weight: 800;
   line-height: 1.2;
-  margin-bottom: 1rem;
 }
 
-/* Accent colour span used to highlight "Dee!" in the hero headline */
-.accent {
-  color: var(--accent-lt);
-}
+.accent { color: var(--accent-lt); }
 
-/* Short bio paragraph below the headline */
-.hero-bio {
+.hub-subtitle {
   color: var(--text-muted);
   font-size: 1.1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
-/* ===========================
-   Projects Section
-   Responsive card grid rendered by script.js.
-   =========================== */
-.projects-section {
-  padding: 5rem 0;
-}
-
-/* Fluid section heading that scales between two sizes */
-.section-title {
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 0.5rem;
-}
-
-/* Subtitle / tagline beneath section headings */
-.section-subtitle {
-  text-align: center;
-  color: var(--text-muted);
-  margin-bottom: 3rem;
-}
-
-/* Auto-fill grid: creates as many 300 px columns as fit, expanding to fill remaining space */
-.projects-grid {
+/* ── Experience grid ────────────────────────────────────────────────────────── */
+.experiences-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.5rem;
+  width: 100%;
+  max-width: 960px;
 }
 
-/* Individual project card */
-.project-card {
+/* ── Experience tile ────────────────────────────────────────────────────────── */
+.experience-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  /* Animate the lift effect and shadow on hover */
-  transition: transform var(--transition), box-shadow var(--transition);
+  padding: 2.5rem 1.5rem;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform var(--transition), box-shadow var(--transition),
+              border-color var(--transition);
 }
 
-/* Lift card upward and deepen shadow on hover to indicate it is interactive */
-.project-card:hover {
-  transform: translateY(-4px);
+.experience-tile:hover {
+  transform: translateY(-6px);
   box-shadow: var(--shadow);
+  border-color: var(--accent);
+  color: var(--text);
 }
 
-/* Row containing the emoji icon and project title */
-.project-card-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-/* Large decorative emoji beside the title */
-.project-icon {
-  font-size: 1.6rem;
+.tile-icon {
+  font-size: 3rem;
   line-height: 1;
 }
 
-.project-title {
-  font-size: 1.1rem;
+.tile-title {
+  font-size: 1.2rem;
   font-weight: 700;
 }
 
-/* Description text — uses flex: 1 so it pushes tags/links to the bottom of the card */
-.project-desc {
+.tile-desc {
   color: var(--text-muted);
-  font-size: 0.93rem;
-  flex: 1;
+  font-size: 0.88rem;
+  line-height: 1.5;
 }
 
-/* Wrapping row of technology tags */
-.project-tags {
+.tile-tags {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.4rem;
+  margin-top: 0.25rem;
 }
 
-/* Individual tech tag badge — purple tint with a matching border */
 .tag {
   background: rgba(124,106,247,.15);
   color: var(--accent-lt);
   border: 1px solid rgba(124,106,247,.3);
   border-radius: 4px;
-  font-size: 0.75rem;
-  padding: 0.15rem 0.55rem;
+  font-size: 0.72rem;
+  padding: 0.12rem 0.5rem;
 }
 
-/* Row of GitHub / Live Demo links at the bottom of each card */
-.project-links {
-  display: flex;
-  gap: 1rem;
-  margin-top: 0.25rem;
+/* GitHub-only projects (no playable demo) — smaller muted style */
+.experience-tile.code-only {
+  padding: 1.5rem 1.25rem;
+  opacity: 0.8;
 }
+.experience-tile.code-only:hover { opacity: 1; }
 
-/* Individual link inside the project card */
-.project-link {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--accent-lt);
-  transition: color var(--transition);
-}
-
-.project-link:hover {
-  color: #fff;
-}
-
-/* Shown when the projects array is empty — spans all grid columns */
 .empty-state {
   grid-column: 1 / -1;
   text-align: center;
@@ -252,57 +113,7 @@
   color: var(--text-muted);
 }
 
-/* ===========================
-   Contact Section
-   Uses a slightly elevated surface colour to visually separate it from
-   the projects section above.
-   =========================== */
-.contact-section {
-  padding: 5rem 0;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-}
-
-/* Centred row of contact icon-links */
-.contact-links {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  flex-wrap: wrap; /* Stacks on narrow screens */
-  margin-top: 1.5rem;
-}
-
-/* Individual contact link — pill-shaped button with icon + label */
-.contact-link {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.6rem 1.4rem;
-  font-weight: 600;
-  color: var(--text);
-  transition: border-color var(--transition), color var(--transition);
-}
-
-/* Highlight the border and text with accent colour on hover */
-.contact-link:hover {
-  border-color: var(--accent-lt);
-  color: var(--accent-lt);
-}
-
-/* Fixed-size SVG icon inside a contact link — flex-shrink prevents squishing */
-.icon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-/* ===========================
-   Footer
-   Minimal copyright bar at the very bottom of the page.
-   =========================== */
+/* ── Footer ─────────────────────────────────────────────────────────────────── */
 .footer {
   text-align: center;
   padding: 1.5rem;
@@ -311,16 +122,8 @@
   border-top: 1px solid var(--border);
 }
 
-/* ===========================
-   Responsive
-   Tighten navbar and nav-link spacing on small screens.
-   =========================== */
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
-  .navbar {
-    padding: 0.85rem 1.25rem;
-  }
-
-  .nav-links {
-    gap: 1.25rem;
-  }
+  .navbar { padding: 0.85rem 1.25rem; }
+  .experiences-grid { grid-template-columns: 1fr; }
 }
