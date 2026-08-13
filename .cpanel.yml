@@ -6,12 +6,12 @@ deployment:
     - /bin/cp -v index.html $DEPLOYPATH
     - /bin/cp -v styles.css $DEPLOYPATH
     - /bin/cp -v script.js $DEPLOYPATH
-    - /bin/cp -v tvtracker.html $DEPLOYPATH
-    - /bin/cp -v tvtracker.css $DEPLOYPATH
-    - /bin/cp -v tvtracker.js $DEPLOYPATH
-    - /bin/cp -v howsyourday.html $DEPLOYPATH
-    - /bin/cp -v howsyourday.css $DEPLOYPATH
-    - /bin/cp -v howsyourday.js $DEPLOYPATH
-    - /bin/cp -v codecracker.html $DEPLOYPATH
-    - /bin/cp -v codecracker.css $DEPLOYPATH
-    - /bin/cp -v codecracker.js $DEPLOYPATH
+    - /bin/cp -v experiences/tvtracker/index.html $DEPLOYPATH/tvtracker.html
+    - /bin/cp -v experiences/tvtracker/style.css $DEPLOYPATH/tvtracker.css
+    - /bin/cp -v experiences/tvtracker/script.js $DEPLOYPATH/tvtracker.js
+    - /bin/cp -v experiences/howsyourday/index.html $DEPLOYPATH/howsyourday.html
+    - /bin/cp -v experiences/howsyourday/style.css $DEPLOYPATH/howsyourday.css
+    - /bin/cp -v experiences/howsyourday/script.js $DEPLOYPATH/howsyourday.js
+    - /bin/cp -v experiences/codecracker/index.html $DEPLOYPATH/codecracker.html
+    - /bin/cp -v experiences/codecracker/style.css $DEPLOYPATH/codecracker.css
+    - /bin/cp -v experiences/codecracker/script.js $DEPLOYPATH/codecracker.js

@@ -38,16 +38,14 @@ const projects = [
     icon: "🎬",
     desc: "Personal TV show tracker — log every episode you watch, rate them with stars, and keep tabs on what you're currently watching or have completed.",
     tags: ["HTML", "CSS", "JavaScript", "localStorage"],
-    // demo is a relative path — served from the same origin as index.html
-    demo: "tvtracker.html",
+    demo: "experiences/tvtracker/index.html",
   },
   {
     title: "How's Your Day?",
     icon: "😊",
     desc: "Pick a mood and watch the matching emoji explode onto the screen — a tiny interactive check-in built with vanilla HTML, CSS, and JavaScript.",
     tags: ["HTML", "CSS", "JavaScript"],
-    // demo is a relative path — served from the same origin as index.html
-    demo: "howsyourday.html",
+    demo: "experiences/howsyourday/index.html",
   },
   {
     title: "Code Cracker",
@@ -55,8 +53,7 @@ const projects = [
     desc: "Break a secret four-colour code in seven attempts using positional and colour feedback after each guess.",
     tags: ["HTML", "CSS", "JavaScript", "Game"],
     github: "https://github.com/dcbgi/CodeCracker",
-    // demo is a relative path — served from the same origin as index.html
-    demo: "codecracker.html",
+    demo: "experiences/codecracker/index.html",
   },
   // ── Add more projects below ──
   // {

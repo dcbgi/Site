@@ -1,5 +1,5 @@
-/* ── codecracker.css ──────────────────────────────────────────────────────────
-   Page-specific styles for codecracker.html.
+/* ── codecracker styles ─────────────────────────────────────────────────────────
+   Page-specific styles for codecracker experience.
    shared.css (loaded first) provides design tokens, the reset, base body /
    link styles, and the shared navbar; this file only adds the layout and
    components unique to this page.

@@ -1,5 +1,5 @@
-/* ── howsyourday.css ─────────────────────────────────────────────────────────
-   Page-specific styles for howsyourday.html.
+/* ── howsyourday styles ─────────────────────────────────────────────────────────
+   Page-specific styles for howsyourday experience.
    shared.css (loaded first) provides design tokens, the reset, base body /
    link styles, and the shared navbar; this file only adds the layout and
    components unique to this page.
@@ -12,7 +12,7 @@ body {
   flex-direction: column;
 }
 
-/* Back-to-portfolio link in the navbar */
+/* Back-to-home link in the navbar */
 .nav-back {
   font-size: 0.9rem;
   font-weight: 600;

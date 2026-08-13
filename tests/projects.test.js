@@ -220,27 +220,93 @@ describe("tvtracker.html external assets", () => {
   });
 });
 
-describe("codecracker.html external assets", () => {
+describe("experiences/codecracker/index.html external assets", () => {
   let doc;
 
   beforeAll(() => {
-    const html = fs.readFileSync(path.join(__dirname, "..", "codecracker.html"), "utf8");
+    const html = fs.readFileSync(path.join(__dirname, "..", "experiences/codecracker/index.html"), "utf8");
     doc = new DOMParser().parseFromString(html, "text/html");
   });
 
   test("links shared.css", () => {
     const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
-    expect(links).toContain("shared.css");
+    expect(links).toContain("../../shared.css");
   });
 
-  test("links codecracker.css", () => {
+  test("links style.css", () => {
     const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
-    expect(links).toContain("codecracker.css");
+    expect(links).toContain("style.css");
   });
 
-  test("loads codecracker.js via <script src>", () => {
+  test("loads script.js via <script src>", () => {
     const scripts = [...doc.querySelectorAll("script[src]")].map((s) => s.getAttribute("src"));
-    expect(scripts).toContain("codecracker.js");
+    expect(scripts).toContain("script.js");
+  });
+
+  test("has no inline <style> block", () => {
+    expect(doc.querySelectorAll("style").length).toBe(0);
+  });
+
+  test("has no inline <script> block", () => {
+    const inlineScripts = [...doc.querySelectorAll("script")].filter((s) => !s.getAttribute("src"));
+    expect(inlineScripts.length).toBe(0);
+  });
+});
+
+describe("experiences/howsyourday/index.html external assets", () => {
+  let doc;
+
+  beforeAll(() => {
+    const html = fs.readFileSync(path.join(__dirname, "..", "experiences/howsyourday/index.html"), "utf8");
+    doc = new DOMParser().parseFromString(html, "text/html");
+  });
+
+  test("links shared.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("../../shared.css");
+  });
+
+  test("links style.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("style.css");
+  });
+
+  test("loads script.js via <script src>", () => {
+    const scripts = [...doc.querySelectorAll("script[src]")].map((s) => s.getAttribute("src"));
+    expect(scripts).toContain("script.js");
+  });
+
+  test("has no inline <style> block", () => {
+    expect(doc.querySelectorAll("style").length).toBe(0);
+  });
+
+  test("has no inline <script> block", () => {
+    const inlineScripts = [...doc.querySelectorAll("script")].filter((s) => !s.getAttribute("src"));
+    expect(inlineScripts.length).toBe(0);
+  });
+});
+
+describe("experiences/tvtracker/index.html external assets", () => {
+  let doc;
+
+  beforeAll(() => {
+    const html = fs.readFileSync(path.join(__dirname, "..", "experiences/tvtracker/index.html"), "utf8");
+    doc = new DOMParser().parseFromString(html, "text/html");
+  });
+
+  test("links shared.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("../../shared.css");
+  });
+
+  test("links style.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("style.css");
+  });
+
+  test("loads script.js via <script src>", () => {
+    const scripts = [...doc.querySelectorAll("script[src]")].map((s) => s.getAttribute("src"));
+    expect(scripts).toContain("script.js");
   });
 
   test("has no inline <style> block", () => {
@@ -256,7 +322,7 @@ describe("codecracker.html external assets", () => {
 // ─── Navigation / routing ─────────────────────────────────────────────────────
 
 describe("sub-page back links point to index.html", () => {
-  const subPages = ["howsyourday.html", "tvtracker.html", "codecracker.html"];
+  const subPages = ["experiences/codecracker/index.html", "experiences/howsyourday/index.html", "experiences/tvtracker/index.html"];
 
   subPages.forEach((page) => {
     describe(page, () => {
@@ -270,13 +336,13 @@ describe("sub-page back links point to index.html", () => {
       test("nav-logo links back to index.html", () => {
         const logo = doc.querySelector(".nav-logo");
         expect(logo).not.toBeNull();
-        expect(logo.getAttribute("href")).toBe("index.html");
+        expect(logo.getAttribute("href")).toBe("../../index.html");
       });
 
       test("nav-back link points to index.html", () => {
         const back = doc.querySelector(".nav-back");
         expect(back).not.toBeNull();
-        expect(back.getAttribute("href")).toBe("index.html");
+        expect(back.getAttribute("href")).toBe("../../index.html");
       });
     });
   });
