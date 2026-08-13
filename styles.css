@@ -9,15 +9,19 @@
 }
 
 /* ── Hub layout ─────────────────────────────────────────────────────────────── */
+/* A soft radial glow behind the hero keeps the page from feeling like flat,
+   dead-centered content — it gives the top of the page a focal point so the
+   grid below reads as a natural continuation instead of a floating block. */
 .hub {
   min-height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   text-align: center;
-  padding: 3rem 1.5rem;
+  padding: 4.5rem 1.5rem 4rem;
   gap: 1rem;
+  background:
+    radial-gradient(ellipse 900px 420px at 50% 0%, rgba(124,106,247,.16), transparent 70%);
 }
 
 .hub-heading {
@@ -31,16 +35,18 @@
 .hub-subtitle {
   color: var(--text-muted);
   font-size: 1.1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 /* ── Experience grid ────────────────────────────────────────────────────────── */
 .experiences-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1.5rem;
   width: 100%;
   max-width: 960px;
+  justify-items: stretch;
+  align-items: start;
 }
 
 /* ── Experience tile ────────────────────────────────────────────────────────── */
@@ -49,26 +55,40 @@
   flex-direction: column;
   align-items: center;
   gap: 0.6rem;
-  background: var(--surface);
+  background: linear-gradient(180deg, var(--surface2), var(--surface));
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 2.5rem 1.5rem;
   text-decoration: none;
   color: var(--text);
   transition: transform var(--transition), box-shadow var(--transition),
-              border-color var(--transition);
+              border-color var(--transition), background var(--transition);
 }
 
 .experience-tile:hover {
   transform: translateY(-6px);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow), 0 0 0 1px rgba(124,106,247,.25);
   border-color: var(--accent);
   color: var(--text);
 }
 
 .tile-icon {
-  font-size: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: rgba(124,106,247,.14);
+  font-size: 2rem;
   line-height: 1;
+  margin-bottom: 0.3rem;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.experience-tile:hover .tile-icon {
+  background: rgba(124,106,247,.25);
+  transform: scale(1.06);
 }
 
 .tile-title {
@@ -125,5 +145,7 @@
 /* ── Responsive ─────────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .navbar { padding: 0.85rem 1.25rem; }
+  .hub { padding: 3rem 1.25rem 3rem; }
   .experiences-grid { grid-template-columns: 1fr; }
+  .experience-tile { padding: 2rem 1.25rem; }
 }

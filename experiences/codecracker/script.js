@@ -9,13 +9,15 @@
  *      yellow dot = correct colour but wrong position
  */
 
+// Ordered as a rainbow so adjacent swatches in the palette read as distinct
+// hues at a glance — the previous red/pink pairing was hard to tell apart.
 const COLORS = [
-  { id: 'red',    label: 'Red',    hex: '#ff2d55' },
-  { id: 'blue',   label: 'Blue',   hex: '#0a84ff' },
-  { id: 'green',  label: 'Green',  hex: '#30d158' },
+  { id: 'red',    label: 'Red',    hex: '#ff3b30' },
+  { id: 'orange', label: 'Orange', hex: '#ff9500' },
   { id: 'yellow', label: 'Yellow', hex: '#ffd60a' },
+  { id: 'green',  label: 'Green',  hex: '#30d158' },
+  { id: 'blue',   label: 'Blue',   hex: '#0a84ff' },
   { id: 'purple', label: 'Purple', hex: '#bf5af2' },
-  { id: 'pink',   label: 'Pink',   hex: '#ff375f' },
 ];
 
 const MAX_ATTEMPTS = 7;

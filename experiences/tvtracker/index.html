@@ -18,46 +18,120 @@
 
     <div class="page-header">
       <h1>📺 <span class="accent">TV Show Tracker</span></h1>
-      <p>Log every show and episode you watch — with ratings</p>
+      <p>Log who watched what, and search the shared log</p>
     </div>
 
     <div class="panel" id="add-panel">
-      <div class="panel-title">Add a New Show</div>
-      <form class="add-show-form" id="add-show-form" autocomplete="off">
-        <input
-          type="text"
-          id="show-input"
-          placeholder="Enter show title…"
-          maxlength="120"
-          aria-label="Show title"
-        />
-        <button type="submit" class="btn btn-primary">+ Add Show</button>
+      <div class="panel-title">Log a Watch</div>
+      <form class="log-entry-form" id="log-entry-form" autocomplete="off">
+        <div class="form-field">
+          <label class="form-label" for="input-username">Username</label>
+          <input class="form-input" type="text" id="input-username" placeholder="e.g. dcbgi" maxlength="60" required />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="input-show">Show</label>
+          <input class="form-input" type="text" id="input-show" placeholder="e.g. Severance" maxlength="120" required />
+        </div>
+        <div class="form-field form-field-sm">
+          <label class="form-label" for="input-season">Season</label>
+          <input class="form-input" type="number" id="input-season" min="1" max="999" placeholder="1" required />
+        </div>
+        <div class="form-field form-field-sm">
+          <label class="form-label" for="input-episode">Episode</label>
+          <input class="form-input" type="number" id="input-episode" min="1" max="999" placeholder="1" required />
+        </div>
+        <div class="form-field form-field-wide">
+          <label class="form-label" for="input-notes">Notes <span class="optional-tag">(optional)</span></label>
+          <input class="form-input" type="text" id="input-notes" placeholder="Any thoughts on this episode…" maxlength="240" />
+        </div>
+        <div class="form-field">
+          <span class="form-label">Rating <span class="optional-tag">(optional)</span></span>
+          <div class="stars" id="rating-input" role="radiogroup" aria-label="Episode rating"></div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="log-entry-submit">+ Log Entry</button>
       </form>
     </div>
 
-    <div class="panel" id="watching-panel">
+    <div class="panel" id="log-panel">
       <div class="panel-title">
-        Currently Watching
-        <span class="badge" id="watching-count">0</span>
+        Watch Log
+        <span class="badge" id="record-count">0</span>
       </div>
-      <div class="shows-list" id="watching-list">
-        <div class="empty-state">
-          <div class="empty-icon">🎬</div>
-          <p>No shows yet — add one above!</p>
-        </div>
-      </div>
-    </div>
 
-    <div class="panel" id="completed-panel">
-      <div class="panel-title">
-        Completed
-        <span class="badge" id="completed-count">0</span>
-      </div>
-      <div class="shows-list" id="completed-list">
-        <div class="empty-state">
-          <div class="empty-icon">✅</div>
-          <p>No completed shows yet.</p>
+      <div class="filter-bar" id="filter-bar">
+        <div class="form-field">
+          <label class="form-label" for="filter-username">Username</label>
+          <select class="form-input" id="filter-username">
+            <option value="">All users</option>
+          </select>
         </div>
+        <div class="form-field">
+          <label class="form-label" for="filter-show">Show</label>
+          <select class="form-input" id="filter-show">
+            <option value="">All shows</option>
+          </select>
+        </div>
+        <div class="form-field form-field-sm">
+          <label class="form-label" for="filter-season">Season</label>
+          <select class="form-input" id="filter-season">
+            <option value="">All</option>
+          </select>
+        </div>
+        <div class="form-field form-field-sm">
+          <label class="form-label" for="filter-episode">Episode</label>
+          <select class="form-input" id="filter-episode">
+            <option value="">All</option>
+          </select>
+        </div>
+        <div class="form-field form-field-wide">
+          <label class="form-label" for="filter-notes">Notes contain</label>
+          <input class="form-input" type="text" id="filter-notes" placeholder="Search notes…" />
+        </div>
+        <div class="form-field form-field-sm">
+          <label class="form-label" for="filter-rating">Rating</label>
+          <select class="form-input" id="filter-rating">
+            <option value="">All</option>
+            <option value="0">Unrated</option>
+            <option value="1">★ 1</option>
+            <option value="2">★ 2</option>
+            <option value="3">★ 3</option>
+            <option value="4">★ 4</option>
+            <option value="5">★ 5</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="filter-status">Status</label>
+          <select class="form-input" id="filter-status">
+            <option value="">All</option>
+            <option value="watching">Watching</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" id="clear-filters-btn">Clear Filters</button>
+      </div>
+
+      <div class="table-scroll">
+        <table class="log-table" id="log-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Show</th>
+              <th>Season</th>
+              <th>Episode</th>
+              <th>Rating</th>
+              <th>Notes</th>
+              <th>Status</th>
+              <th>Logged</th>
+              <th class="col-actions"></th>
+            </tr>
+          </thead>
+          <tbody id="log-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="empty-state" id="log-empty-state" style="display:none;">
+        <div class="empty-icon">📭</div>
+        <p id="log-empty-text">No records logged yet.</p>
       </div>
     </div>
 

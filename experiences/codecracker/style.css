@@ -37,21 +37,30 @@ main {
 .page-header p { color: var(--text-muted); font-size: 1rem; }
 
 /* ── Board ──────────────────────────────────────────────────────────────────── */
+/* The board can be wider than very narrow phone screens (row label + 4 pegs +
+   feedback dots). Rather than let it force the whole page to scroll
+   horizontally, it scrolls within its own box so the rest of the layout
+   stays put. */
 #board {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-bottom: 24px;
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: 2px;
 }
 
 .attempt-row {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: max-content;
 }
 
 .row-label {
   width: 28px;
+  flex-shrink: 0;
   text-align: right;
   font-size: 0.85rem;
   color: var(--text-muted);
@@ -60,6 +69,7 @@ main {
 .pegs {
   display: flex;
   gap: 10px;
+  flex-shrink: 0;
 }
 
 .peg {
@@ -91,6 +101,7 @@ main {
   grid-template-columns: repeat(2, 1fr);
   gap: 5px;
   width: 40px;
+  flex-shrink: 0;
 }
 
 .fb-peg {
@@ -302,6 +313,16 @@ footer {
 
 /* ── Responsive ─────────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
+  main { padding: 1.5rem 1rem 2.5rem; }
   .peg { width: 46px; height: 46px; }
   .color-btn { width: 44px; height: 44px; }
+}
+
+@media (max-width: 360px) {
+  .attempt-row { gap: 8px; }
+  .row-label { width: 22px; font-size: 0.75rem; }
+  .pegs { gap: 6px; }
+  .peg { width: 40px; height: 40px; border-width: 2px; }
+  .feedback { width: 34px; gap: 4px; }
+  .fb-peg { width: 13px; height: 13px; }
 }
