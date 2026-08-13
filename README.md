@@ -15,7 +15,7 @@ A personal portfolio website that showcases projects I've built. The entire site
 3. [Adding a New Project](#adding-a-new-project)
 4. [Running Locally](#running-locally)
 5. [Testing](#testing)
-6. [Deploying via cPanel](#deploying-via-cpanel)
+6. [Deploying to Vercel](#deploying-to-vercel)
 
 ---
 
@@ -33,8 +33,7 @@ A personal portfolio website that showcases projects I've built. The entire site
 | `howsyourday.html` | Mood-check mini-app |
 | `howsyourday.css` | Page-specific styles for `howsyourday.html` (mood buttons, overlay, animations) |
 | `howsyourday.js` | Mood-check logic (mood button clicks, overlay show/hide, keyboard handling) |
-| `tests/projects.test.js` | Jest tests for project data schema, rendering logic, and deployment config |
-| `.cpanel.yml` | Deployment instructions for cPanel Git Version Control |
+| `tests/projects.test.js` | Jest tests for project data schema and rendering logic |
 
 ---
 
@@ -233,21 +232,18 @@ Each project in the `projects` array is checked to ensure it:
 - Uses a valid HTTPS URL for the optional `github` field
 - Uses a valid HTTPS URL or non-empty relative path for the optional `demo` field
 
-Additional tests verify that HTML special characters in project data are escaped (XSS protection), that the card renderer produces the expected output, and that every local demo file is included in the cPanel deployment config.
+Additional tests verify that HTML special characters in project data are escaped (XSS protection) and that the card renderer produces the expected output.
 
 ---
 
-## Deploying via cPanel
+## Deploying to Vercel
 
-This repository includes a `.cpanel.yml` file that enables automatic deployment through cPanel's **Git Version Control** feature.
+This is a static site with no build step, so Vercel can deploy it as-is.
 
 **Setup (one-time):**
-1. Log in to cPanel and open **Git Version Control**.
-2. Clone this repository using its GitHub URL.
+1. Import this repository into [Vercel](https://vercel.com/new).
+2. Leave the Framework Preset as **Other** and the build command empty — Vercel serves the repo's static files directly.
 
 **Deploying updates:**
-- Push commits to the linked branch, then click **Update** followed by **Deploy HEAD Commit** in cPanel, or
-- Use the **Deploy HEAD Commit** button at any time to manually trigger a deployment.
-
-Files deployed to `public_html`: `shared.css`, `index.html`, `styles.css`, `script.js`, `tvtracker.html`, `tvtracker.css`, `tvtracker.js`, `howsyourday.html`, `howsyourday.css`, `howsyourday.js`.
+- Push commits to `main` — Vercel automatically builds and deploys on every push, with preview deployments for pull requests.
 
