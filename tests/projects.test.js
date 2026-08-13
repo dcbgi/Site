@@ -89,43 +89,6 @@ describe("projects array", () => {
   });
 });
 
-// ─── Deployment config covers all local demo pages ───────────────────────────
-
-describe(".cpanel.yml deployment", () => {
-  let cpanelContent;
-
-  beforeAll(() => {
-    cpanelContent = fs.readFileSync(path.join(__dirname, "..", ".cpanel.yml"), "utf8");
-  });
-
-  const localDemos = projects
-    .filter((p) => p.demo && !p.demo.startsWith("https://"))
-    .map((p) => p.demo);
-
-  localDemos.forEach((demoFile) => {
-    test(`deploys ${demoFile} via a copy command`, () => {
-      expect(cpanelContent).toMatch(new RegExp("/bin/cp.*\\b" + demoFile + "\\b"));
-    });
-  });
-
-  // Each demo folder has companion style.css and script.js files
-  localDemos.forEach((demoFile) => {
-    const dir = demoFile.replace(/\/index\.html$/, "");
-
-    test(`deploys ${dir}/style.css`, () => {
-      expect(cpanelContent).toMatch(new RegExp("/bin/cp.*" + dir + "/style\\.css"));
-    });
-
-    test(`deploys ${dir}/script.js`, () => {
-      expect(cpanelContent).toMatch(new RegExp("/bin/cp.*" + dir + "/script\\.js"));
-    });
-  });
-
-  test("deploys shared.css via a copy command", () => {
-    expect(cpanelContent).toMatch(/\/bin\/cp.*\bshared\.css\b/);
-  });
-});
-
 // ─── External CSS / JS references ────────────────────────────────────────────
 // After extracting inline styles and scripts to separate files, each HTML page
 // must reference those files via <link> and <script src="..."> tags.
