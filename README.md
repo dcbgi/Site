@@ -10,7 +10,7 @@ A personal portfolio website that showcases projects I've built. The entire site
 2. [How the Code Works Together](#how-the-code-works-together)
    - [Shared Design System](#shared-design-system-sharedcss)
    - [Main Portfolio Page](#main-portfolio-page-indexhtml--stylescsss--scriptjs)
-   - [TV Show Tracker](#tv-show-tracker-tvtrackerhtml--tvtrackercss--tvtrackerjs)
+   - [TV Show Tracker](#tv-show-tracker-experiencestvtrackerindexhtml--stylecss--scriptjs)
    - [How's Your Day?](#hows-your-day-howsyourdayhtml--howsyourdaycss--howsyourdayjs)
 3. [Adding a New Project](#adding-a-new-project)
 4. [Running Locally](#running-locally)
@@ -27,9 +27,9 @@ A personal portfolio website that showcases projects I've built. The entire site
 | `index.html` | Main portfolio page — hero/about section, projects grid, contact section |
 | `styles.css` | Layout, components, and styles specific to `index.html` |
 | `script.js` | Project data array + functions to render cards and set the footer year |
-| `tvtracker.html` | TV show tracker app |
-| `tvtracker.css` | Page-specific styles for `tvtracker.html` (app tokens, layout, components) |
-| `tvtracker.js` | TV show tracker logic (localStorage, rendering, event handling) |
+| `experiences/tvtracker/index.html` | TV show watch-log app |
+| `experiences/tvtracker/style.css` | Page-specific styles (form/filter layout, table, mobile card view) |
+| `experiences/tvtracker/script.js` | Watch-log logic (localStorage, filtering, table rendering) |
 | `howsyourday.html` | Mood-check mini-app |
 | `howsyourday.css` | Page-specific styles for `howsyourday.html` (mood buttons, overlay, animations) |
 | `howsyourday.js` | Mood-check logic (mood button clicks, overlay show/hide, keyboard handling) |
@@ -99,58 +99,65 @@ Browser loads index.html
 
 ---
 
-### TV Show Tracker (`tvtracker.html` + `tvtracker.css` + `tvtracker.js`)
+### TV Show Tracker (`experiences/tvtracker/index.html` + `style.css` + `script.js`)
+
+A shared watch-log: anyone using the browser logs a row (username, show,
+season, episode, optional notes) and the table below is filterable by every
+column — e.g. pick one username to see everything they've logged, or a
+username **and** a show to narrow to just that pairing.
 
 ```
-Browser loads tvtracker.html
+Browser loads index.html
   │
-  ├── <link rel="stylesheet" href="shared.css" />
+  ├── <link rel="stylesheet" href="../../shared.css" />
   │     └── Design tokens, reset, base styles, shared navbar
   │
-  ├── <link rel="stylesheet" href="tvtracker.css" />
-  │     └── App-specific tokens (--danger, --success, --star), layout,
-  │           panels, buttons, show cards, episode list, star rating, footer
+  ├── <link rel="stylesheet" href="style.css" />
+  │     └── App-specific tokens (--danger, --success), form/filter layout,
+  │           table styling, and a table→stacked-card layout under 640px
   │
-  └── <script src="tvtracker.js"></script>  (IIFE — Immediately Invoked Function Expression)
+  └── <script src="script.js"></script>  (IIFE — Immediately Invoked Function Expression)
         │
         ├── localStorage  ─────────────────────── Persistence layer
-        │     • STORAGE_KEY = "tvtracker_shows"
-        │     • loadShows()  — JSON.parse from localStorage on startup
-        │     • saveShows()  — JSON.stringify to localStorage after every change
+        │     • STORAGE_KEY = "tvtracker_records"
+        │     • loadRecords() — JSON.parse from localStorage on startup
+        │     • saveRecords() — JSON.stringify to localStorage after every change
         │
         ├── State variables
-        │     • shows[]       — master array of show objects loaded from storage
-        │     • openCards{}   — tracks which show cards are expanded
-        │     • openForms{}   — tracks which "Log Episode" forms are open
-        │     • pendingRating{} — stores the highlighted star value before submit
+        │     • records[]  — flat array of { id, username, show, season,
+        │                     episode, notes, loggedAt }, one per logged watch
+        │     • filters{}  — active column filters (username/show/season/
+        │                     episode = exact match, notes = substring)
         │
         ├── Helper functions
-        │     • genId()       — generates a unique ID (timestamp + random suffix)
-        │     • nextEpNum()   — returns suggested next episode number for a show
-        │     • avgRating()   — calculates mean star rating for rated episodes
-        │     • esc()         — HTML-escapes user strings (XSS protection)
-        │     • starsHtml()   — builds a read-only ★ display for a given rating
-        │     • fmtDate()     — formats a Unix timestamp to a locale date string
+        │     • genId()          — generates a unique ID (timestamp + random suffix)
+        │     • esc()             — HTML-escapes user strings (XSS protection)
+        │     • fmtDate()         — formats a Unix timestamp to a locale date string
+        │     • uniqueSorted()    — distinct values of a field, for filter dropdowns
+        │     • populateSelect()  — rebuilds a <select>'s options, keeping the
+        │                           current selection if it still exists
         │
-        ├── showCardHtml(show)
-        │     • Builds the complete HTML string for one collapsible show card
-        │     • Every user-supplied string is passed through esc() before innerHTML
+        ├── refreshFilterOptions()
+        │     • Rebuilds the username/show/season/episode dropdowns from the
+        │       full record set — called after add/delete, not on every filter
+        │       interaction, so an in-progress filter selection isn't reset
         │
-        ├── render()
-        │     • Splits shows[] into watching / completed lists
-        │     • Updates badge counts and re-renders card lists
-        │     • Called after every state mutation
+        ├── renderTable()
+        │     • Applies matchesFilters() to records[], sorts newest-first,
+        │       renders rows (or an empty state) and updates the count badge
         │
-        ├── Event delegation (single document click listener)
-        │     • Identifies the clicked element with closest() and data-show-id
-        │     • Routes to: toggle card │ toggle log form │ star select │
-        │                  log episode │ delete episode │ mark complete │
-        │                  move to watching │ delete show
+        ├── Log-a-watch form submit listener
+        │     • Validates username/show/season/episode are present, notes stays
+        │       optional; pushes a new record, saves, re-renders, and clears
+        │       the form (keeping the username filled in for quick re-entry)
         │
-        ├── Add-show form submit listener
-        │     • Creates a new show object, saves, re-renders, scrolls card into view
+        ├── Filter listeners
+        │     • change on each dropdown / input on the notes search box
+        │       update filters{} and call renderTable()
+        │     • "Clear Filters" resets filters{} and every control
         │
-        └── Initial render() call — populates the UI from localStorage on load
+        └── Delete-record listener (event delegation on the table body)
+              • Confirms, removes the record by id, saves, re-renders
 ```
 
 ---
