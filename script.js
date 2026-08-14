@@ -14,11 +14,11 @@
 // `projects` — the "true experiences" shown as tiles on the main hub (index.html).
 const projects = [
   {
-    title: "Personal Profile Site",
-    icon: "🌐",
-    desc: "This website — a personal profile and project showcase built with vanilla HTML, CSS and JavaScript.",
-    tags: ["HTML", "CSS", "JavaScript"],
-    demo: "more.html",
+    title: "Book Challenge",
+    icon: "📚",
+    desc: "Shared reading challenge for a group — log books and pages, and watch a live scoreboard rank everyone's progress toward their own yearly goal.",
+    tags: ["HTML", "CSS", "JavaScript", "Firebase"],
+    demo: "experiences/bookchallenge/index.html",
   },
   {
     title: "TV Show Tracker",
@@ -26,6 +26,13 @@ const projects = [
     desc: "Shared TV tracker — log what you're watching, where you left off, your watchlist, and your ratings, synced live across devices.",
     tags: ["HTML", "CSS", "JavaScript", "Firebase"],
     demo: "experiences/tvtracker/index.html",
+  },
+  {
+    title: "How's Your Day?",
+    icon: "😊",
+    desc: "Pick a mood and watch the matching emoji explode onto the screen — a tiny interactive check-in built with vanilla HTML, CSS, and JavaScript.",
+    tags: ["HTML", "CSS", "JavaScript"],
+    demo: "experiences/howsyourday/index.html",
   },
   {
     title: "Code Cracker",
@@ -36,11 +43,11 @@ const projects = [
     demo: "experiences/codecracker/index.html",
   },
   {
-    title: "Book Challenge",
-    icon: "📚",
-    desc: "Shared reading challenge for a group — log books and pages, and watch a live scoreboard rank everyone's progress toward their own yearly goal.",
-    tags: ["HTML", "CSS", "JavaScript", "Firebase"],
-    demo: "experiences/bookchallenge/index.html",
+    title: "Personal Profile Site",
+    icon: "🌐",
+    desc: "This website — a personal profile and project showcase built with vanilla HTML, CSS and JavaScript.",
+    tags: ["HTML", "CSS", "JavaScript"],
+    demo: "more.html",
   },
 ];
 
@@ -60,13 +67,6 @@ const moreProjects = [
     desc: "Android tip calculator app — quickly compute restaurant tips at 10%, 15%, or a custom percentage.",
     tags: ["Android", "Java"],
     github: "https://github.com/dcbgi/Tipper",
-  },
-  {
-    title: "How's Your Day?",
-    icon: "😊",
-    desc: "Pick a mood and watch the matching emoji explode onto the screen — a tiny interactive check-in built with vanilla HTML, CSS, and JavaScript.",
-    tags: ["HTML", "CSS", "JavaScript"],
-    demo: "experiences/howsyourday/index.html",
   },
   // ── Add more projects below ──
   // {
