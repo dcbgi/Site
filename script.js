@@ -61,6 +61,13 @@ const moreProjects = [
     tags: ["HTML", "CSS", "JavaScript"],
     demo: "experiences/howsyourday/index.html",
   },
+  {
+    title: "Book Challenge",
+    icon: "📚",
+    desc: "Shared reading challenge for a group — log books and pages, and watch a live scoreboard rank everyone's progress toward their own yearly goal.",
+    tags: ["HTML", "CSS", "JavaScript", "Firebase"],
+    demo: "experiences/bookchallenge/index.html",
+  },
   // ── Add more projects below ──
   // {
   //   title: "My Next Project",

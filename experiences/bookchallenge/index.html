@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Challenge – dcbgi</title>
+  <link rel="stylesheet" href="../../shared.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="../../index.html" class="nav-logo">Berry Better Solutions</a>
+    <a href="../../index.html" class="nav-back">← Back to Home</a>
+  </nav>
+
+  <main>
+
+    <div class="page-header">
+      <h1>📚 <span class="accent">Book Challenge</span></h1>
+      <p>A shared reading challenge — log books, track pages, and see the scoreboard</p>
+    </div>
+
+    <div class="banner" id="status-banner" role="status"></div>
+
+    <div class="panel" id="scoreboard-panel">
+      <div class="panel-title">
+        🏆 Scoreboard
+        <span class="badge" id="baseline-badge">…</span>
+      </div>
+      <div id="scoreboard-list"></div>
+      <div class="empty-state" id="scoreboard-empty-state" style="display:none;">
+        <div class="empty-icon">🏁</div>
+        <p>Add a reader below to start the challenge.</p>
+      </div>
+    </div>
+
+    <div class="panel" id="readers-panel">
+      <div class="panel-title">Readers &amp; Goals</div>
+      <form class="log-entry-form" id="reader-form" autocomplete="off">
+        <div class="form-field">
+          <label class="form-label" for="input-reader-name">Name</label>
+          <input class="form-input" type="text" id="input-reader-name" placeholder="e.g. Jordan" maxlength="60" required />
+        </div>
+        <div class="form-field form-field-sm">
+          <label class="form-label" for="input-reader-goal">Goal (books)</label>
+          <input class="form-input" type="number" id="input-reader-goal" min="1" max="999" placeholder="18" required />
+        </div>
+        <button type="submit" class="btn btn-primary" id="reader-submit">+ Add Reader</button>
+      </form>
+      <div class="table-scroll">
+        <table class="log-table" id="readers-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Goal</th>
+              <th class="col-actions"></th>
+            </tr>
+          </thead>
+          <tbody id="readers-tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="readers-empty-state" style="display:none;">
+        <div class="empty-icon">👥</div>
+        <p>No readers yet — add the first one above.</p>
+      </div>
+    </div>
+
+    <div class="panel" id="add-panel">
+      <div class="panel-title">Log a Book</div>
+      <form class="log-entry-form" id="log-entry-form" autocomplete="off">
+        <div class="form-field">
+          <label class="form-label" for="input-reader">Reader</label>
+          <select class="form-input" id="input-reader" required>
+            <option value="">Select a reader…</option>
+          </select>
+        </div>
+        <div class="form-field form-field-wide">
+          <label class="form-label" for="input-title">Book Title</label>
+          <input class="form-input" type="text" id="input-title" placeholder="e.g. Project Hail Mary" maxlength="160" required />
+        </div>
+        <div class="form-field form-field-sm">
+          <label class="form-label" for="input-pages">Pages</label>
+          <input class="form-input" type="number" id="input-pages" min="1" max="10000" placeholder="320" required />
+        </div>
+        <button type="submit" class="btn btn-primary" id="log-entry-submit">+ Log Book</button>
+      </form>
+    </div>
+
+    <div class="panel" id="log-panel">
+      <div class="panel-title">
+        All Entries
+        <span class="badge" id="entry-count">0</span>
+      </div>
+      <div class="table-scroll">
+        <table class="log-table" id="log-table">
+          <thead>
+            <tr>
+              <th>Reader</th>
+              <th>Book</th>
+              <th>Pages</th>
+              <th>Book Credit</th>
+              <th>Logged</th>
+              <th class="col-actions"></th>
+            </tr>
+          </thead>
+          <tbody id="log-tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="log-empty-state" style="display:none;">
+        <div class="empty-icon">📭</div>
+        <p>No books logged yet — add one above!</p>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>&copy; <span id="year"></span> dcbgi. Book Challenge — shared live via Firebase.</p>
+  </footer>
+
+  <script type="module" src="script.js"></script>
+
+</body>
+</html>

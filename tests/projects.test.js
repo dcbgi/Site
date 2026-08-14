@@ -243,10 +243,43 @@ describe("experiences/tvtracker/index.html external assets", () => {
   });
 });
 
+describe("experiences/bookchallenge/index.html external assets", () => {
+  let doc;
+
+  beforeAll(() => {
+    const html = fs.readFileSync(path.join(__dirname, "..", "experiences/bookchallenge/index.html"), "utf8");
+    doc = new DOMParser().parseFromString(html, "text/html");
+  });
+
+  test("links shared.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("../../shared.css");
+  });
+
+  test("links style.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("style.css");
+  });
+
+  test("loads script.js as a module via <script src>", () => {
+    const scripts = [...doc.querySelectorAll("script[src]")].map((s) => s.getAttribute("src"));
+    expect(scripts).toContain("script.js");
+  });
+
+  test("has no inline <style> block", () => {
+    expect(doc.querySelectorAll("style").length).toBe(0);
+  });
+
+  test("has no inline <script> block", () => {
+    const inlineScripts = [...doc.querySelectorAll("script")].filter((s) => !s.getAttribute("src"));
+    expect(inlineScripts.length).toBe(0);
+  });
+});
+
 // ─── Navigation / routing ─────────────────────────────────────────────────────
 
 describe("sub-page back links point to index.html", () => {
-  const subPages = ["experiences/codecracker/index.html", "experiences/howsyourday/index.html", "experiences/tvtracker/index.html"];
+  const subPages = ["experiences/codecracker/index.html", "experiences/howsyourday/index.html", "experiences/tvtracker/index.html", "experiences/bookchallenge/index.html"];
 
   subPages.forEach((page) => {
     describe(page, () => {
