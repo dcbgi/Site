@@ -10,12 +10,13 @@
 // firestore.rules.txt for the security rules to publish.
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check.js";
 import {
   getFirestore, collection, addDoc, deleteDoc, doc, updateDoc,
   onSnapshot, query, orderBy, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { firebaseConfig } from "./firebase-config.js";
+import { firebaseConfig, recaptchaSiteKey } from "./firebase-config.js";
 
 // ── esc ───────────────────────────────────────────────────────────────────
 // Escapes the five HTML-special characters before inserting any user data
@@ -83,6 +84,17 @@ if (configIsPlaceholder) {
 } else {
   try {
     app = initializeApp(firebaseConfig);
+
+    // App Check is optional until you've completed the setup steps in
+    // firebase-config.js — skip it silently rather than breaking the page
+    // if the site key is still a placeholder.
+    if (recaptchaSiteKey.indexOf("REPLACE_WITH_YOUR") !== 0) {
+      initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider(recaptchaSiteKey),
+        isTokenAutoRefreshEnabled: true,
+      });
+    }
+
     db = getFirestore(app);
     auth = getAuth(app);
     showBanner("Connecting…", "info");

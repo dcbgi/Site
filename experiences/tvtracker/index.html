@@ -23,7 +23,12 @@
 
     <div class="banner" id="status-banner" role="status"></div>
 
-    <div class="panel" id="add-panel">
+    <div class="owner-auth">
+      <button type="button" class="btn btn-sm btn-ghost" id="sign-in-btn">🔐 Sign in as Owner</button>
+      <button type="button" class="btn btn-sm btn-ghost" id="sign-out-btn" style="display:none;">Sign Out</button>
+    </div>
+
+    <div class="panel" id="add-panel" style="display:none;">
       <div class="panel-title">Add a Show</div>
       <form class="log-entry-form" id="add-show-form" autocomplete="off">
         <div class="form-field">

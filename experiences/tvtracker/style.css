@@ -74,6 +74,13 @@ main {
   color: var(--danger);
 }
 
+.owner-auth {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* ── Panels ─────────────────────────────────────────────────────────────────── */
 .panel {
   background: var(--surface);

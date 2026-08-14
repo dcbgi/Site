@@ -1,24 +1,31 @@
 // ── TV Show Tracker ─────────────────────────────────────────────────────────
-// A shared, cross-device watch tracker backed by Firebase Firestore — mirrors
-// the Book Challenge architecture. Every browser gets a silent anonymous auth
-// session (no login UI); that session's uid tags anything it creates, which
-// Firestore security rules use to allow only the creator to delete their own
-// entries. Anyone can still add/update a show for any username.
+// A shared, cross-device watch tracker backed by Firebase Firestore. Anyone
+// can VIEW the tracker (public read), but adding/editing/deleting a show
+// requires signing in with Google as the specific owner account — checked by
+// email in Firestore's security rules, not just "any authenticated user".
+// This stops other people from creating false records while still letting
+// friends browse the list.
 //
 // One document per show (not per episode): each tracks its own status
 // (want to watch / watching / completed), current season+episode, rating,
 // and notes — editing progress is a couple of clicks, not a new form entry.
 //
 // See firebase-config.js for one-time setup instructions, and
-// firestore.rules.txt for the security rules to publish.
+// firestore.rules.txt for the security rules to publish. OWNER_EMAIL below
+// must match the email hardcoded into firestore.rules.txt's isOwner().
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
   getFirestore, collection, addDoc, deleteDoc, doc, updateDoc,
   onSnapshot, query, orderBy, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { firebaseConfig } from "./firebase-config.js";
+
+// Replace with your Google account email — must match firestore.rules.txt.
+var OWNER_EMAIL = "deiondreaberry@example.com";
 
 // ── esc ───────────────────────────────────────────────────────────────────
 function esc(str) {
@@ -47,6 +54,14 @@ function interactiveStarsHtml(showId, rating) {
   html += "</span>";
   return html;
 }
+function starsDisplayHtml(rating) {
+  var html = '<span class="stars-display" aria-label="' + rating + ' out of 5 stars">';
+  for (var i = 1; i <= 5; i++) {
+    html += '<span class="star-display' + (i <= rating ? " filled" : "") + '">★</span>';
+  }
+  html += "</span>";
+  return html;
+}
 
 // ── Firebase init ─────────────────────────────────────────────────────────
 var configIsPlaceholder = Object.keys(firebaseConfig).some(function (key) {
@@ -54,8 +69,8 @@ var configIsPlaceholder = Object.keys(firebaseConfig).some(function (key) {
 });
 
 var app, db, auth;
-var currentUid = null;
-var shows = []; // [{ id, username, title, status, season, episode, rating, notes, creatorUid }]
+var isOwner = false;
+var shows = []; // [{ id, username, title, status, season, episode, rating, notes }]
 
 function showBanner(text, kind) {
   var el = document.getElementById("status-banner");
@@ -64,6 +79,26 @@ function showBanner(text, kind) {
 }
 function hideBanner() {
   document.getElementById("status-banner").className = "banner";
+}
+function updateAuthUi(user) {
+  var signInBtn = document.getElementById("sign-in-btn");
+  var signOutBtn = document.getElementById("sign-out-btn");
+  var addPanel = document.getElementById("add-panel");
+
+  if (isOwner) {
+    signInBtn.style.display = "none";
+    signOutBtn.style.display = "";
+    addPanel.style.display = "";
+    hideBanner();
+  } else {
+    signInBtn.style.display = "";
+    signOutBtn.style.display = "none";
+    addPanel.style.display = "none";
+    showBanner(
+      user ? "👀 Signed in, but not as the owner — viewing read-only." : "👀 Viewing read-only. Sign in as the owner to add or edit shows.",
+      "info"
+    );
+  }
 }
 
 if (configIsPlaceholder) {
@@ -76,17 +111,19 @@ if (configIsPlaceholder) {
     app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     auth = getAuth(app);
-    showBanner("Connecting…", "info");
 
     onAuthStateChanged(auth, function (user) {
-      if (user) {
-        currentUid = user.uid;
-        hideBanner();
-        renderAll(); // Re-render so "your" delete buttons appear once known
-      }
+      isOwner = !!(user && user.email === OWNER_EMAIL);
+      updateAuthUi(user);
+      renderAll(); // Re-render so owner-only controls appear/disappear
     });
-    signInAnonymously(auth).catch(function (err) {
-      showBanner("⚠️ Couldn't connect: " + err.message, "error");
+
+    document.getElementById("sign-in-btn").addEventListener("click", function () {
+      signInWithPopup(auth, new GoogleAuthProvider())
+        .catch(function (err) { showBanner("⚠️ Sign-in failed: " + err.message, "error"); });
+    });
+    document.getElementById("sign-out-btn").addEventListener("click", function () {
+      signOut(auth);
     });
 
     onSnapshot(query(collection(db, "shows"), orderBy("updatedAt", "desc")), function (snap) {
@@ -116,7 +153,7 @@ function cardTop(show) {
   );
 }
 function deleteButtonHtml(show) {
-  if (!(currentUid && show.creatorUid === currentUid)) return "";
+  if (!isOwner) return "";
   return '<button class="btn btn-icon btn-icon-danger delete-show-btn" data-show-id="' + esc(show.id) + '" title="Delete this show" aria-label="Delete this show">✕</button>';
 }
 
@@ -136,16 +173,20 @@ function renderWatching() {
         '<div class="show-progress">' +
           '<span class="cell-pill">S' + esc(show.season) + "</span>" +
           '<span class="cell-pill">E' + esc(show.episode) + "</span>" +
-          '<input class="form-input progress-input season-input" type="number" min="1" max="999" value="' + esc(show.season) + '" data-show-id="' + esc(show.id) + '" aria-label="Season" />' +
-          '<input class="form-input progress-input episode-input" type="number" min="1" max="999" value="' + esc(show.episode) + '" data-show-id="' + esc(show.id) + '" aria-label="Episode" />' +
-          '<button class="btn btn-sm btn-primary save-progress-btn" data-show-id="' + esc(show.id) + '">Save</button>' +
-          '<button class="btn btn-sm btn-ghost next-episode-btn" data-show-id="' + esc(show.id) + '">+1 Ep</button>' +
-          '<button class="btn btn-sm btn-ghost next-season-btn" data-show-id="' + esc(show.id) + '">+1 Season</button>' +
+          (isOwner
+            ? '<input class="form-input progress-input season-input" type="number" min="1" max="999" value="' + esc(show.season) + '" data-show-id="' + esc(show.id) + '" aria-label="Season" />' +
+              '<input class="form-input progress-input episode-input" type="number" min="1" max="999" value="' + esc(show.episode) + '" data-show-id="' + esc(show.id) + '" aria-label="Episode" />' +
+              '<button class="btn btn-sm btn-primary save-progress-btn" data-show-id="' + esc(show.id) + '">Save</button>' +
+              '<button class="btn btn-sm btn-ghost next-episode-btn" data-show-id="' + esc(show.id) + '">+1 Ep</button>' +
+              '<button class="btn btn-sm btn-ghost next-season-btn" data-show-id="' + esc(show.id) + '">+1 Season</button>'
+            : "") +
         "</div>" +
-        '<div class="show-actions">' +
-          '<button class="btn btn-sm btn-ghost mark-completed-btn" data-show-id="' + esc(show.id) + '">✅ Mark Completed</button>' +
-          deleteButtonHtml(show) +
-        "</div>" +
+        (isOwner
+          ? '<div class="show-actions">' +
+              '<button class="btn btn-sm btn-ghost mark-completed-btn" data-show-id="' + esc(show.id) + '">✅ Mark Completed</button>' +
+              deleteButtonHtml(show) +
+            "</div>"
+          : "") +
       "</div>"
     );
   }).join("");
@@ -164,10 +205,12 @@ function renderToWatch() {
     return (
       '<div class="show-card" data-show-id="' + esc(show.id) + '">' +
         cardTop(show) +
-        '<div class="show-actions">' +
-          '<button class="btn btn-sm btn-primary start-watching-btn" data-show-id="' + esc(show.id) + '">▶ Start Watching</button>' +
-          deleteButtonHtml(show) +
-        "</div>" +
+        (isOwner
+          ? '<div class="show-actions">' +
+              '<button class="btn btn-sm btn-primary start-watching-btn" data-show-id="' + esc(show.id) + '">▶ Start Watching</button>' +
+              deleteButtonHtml(show) +
+            "</div>"
+          : "") +
       "</div>"
     );
   }).join("");
@@ -186,14 +229,16 @@ function renderCompleted() {
     return (
       '<div class="show-card" data-show-id="' + esc(show.id) + '">' +
         cardTop(show) +
-        interactiveStarsHtml(show.id, show.rating || 0) +
+        (isOwner ? interactiveStarsHtml(show.id, show.rating || 0) : starsDisplayHtml(show.rating || 0)) +
         (show.notes
           ? '<p class="show-notes">' + esc(show.notes) + "</p>"
           : "") +
-        '<div class="show-actions">' +
-          '<button class="btn btn-sm btn-ghost resume-watching-btn" data-show-id="' + esc(show.id) + '">↺ Resume Watching</button>' +
-          deleteButtonHtml(show) +
-        "</div>" +
+        (isOwner
+          ? '<div class="show-actions">' +
+              '<button class="btn btn-sm btn-ghost resume-watching-btn" data-show-id="' + esc(show.id) + '">↺ Resume Watching</button>' +
+              deleteButtonHtml(show) +
+            "</div>"
+          : "") +
       "</div>"
     );
   }).join("");
@@ -220,7 +265,7 @@ document.getElementById("rating-input").addEventListener("click", function (e) {
 // ── Add a show ──────────────────────────────────────────────────────────────
 document.getElementById("add-show-form").addEventListener("submit", function (e) {
   e.preventDefault();
-  if (!db || !currentUid) { showBanner("⚠️ Still connecting — try again in a moment.", "warn"); return; }
+  if (!db || !isOwner) { showBanner("⚠️ Sign in as the owner to add a show.", "warn"); return; }
 
   var usernameEl = document.getElementById("input-username");
   var titleEl = document.getElementById("input-title");
@@ -249,7 +294,6 @@ document.getElementById("add-show-form").addEventListener("submit", function (e)
     episode: episode,
     rating: rating,
     notes: notes,
-    creatorUid: currentUid,
     updatedAt: serverTimestamp(),
   }).catch(function (err) { showBanner("⚠️ Couldn't add show: " + err.message, "error"); });
 
@@ -264,7 +308,7 @@ document.getElementById("add-show-form").addEventListener("submit", function (e)
 
 // ── Shared update helper ────────────────────────────────────────────────────
 function updateShow(showId, fields) {
-  if (!db || !currentUid) { showBanner("⚠️ Still connecting — try again in a moment.", "warn"); return; }
+  if (!db || !isOwner) { showBanner("⚠️ Sign in as the owner to make changes.", "warn"); return; }
   updateDoc(doc(db, "shows", showId), Object.assign({}, fields, { updatedAt: serverTimestamp() }))
     .catch(function (err) { showBanner("⚠️ Couldn't update show: " + err.message, "error"); });
 }
