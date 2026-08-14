@@ -23,8 +23,8 @@ const projects = [
   {
     title: "TV Show Tracker",
     icon: "🎬",
-    desc: "Personal TV show tracker — log every episode you watch, rate them with stars, and keep tabs on what you're currently watching or have completed.",
-    tags: ["HTML", "CSS", "JavaScript", "localStorage"],
+    desc: "Shared TV tracker — log what you're watching, where you left off, your watchlist, and your ratings, synced live across devices.",
+    tags: ["HTML", "CSS", "JavaScript", "Firebase"],
     demo: "experiences/tvtracker/index.html",
   },
   {

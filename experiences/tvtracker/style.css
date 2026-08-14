@@ -10,6 +10,7 @@
   --danger:  #e05c6e;  /* Destructive-action red (delete buttons)   */
   --success: #4caf82;  /* Positive-action green (completed status)  */
   --star:    #f5c842;  /* Star-rating yellow                        */
+  --warn:    #e0b25c;  /* Status banner warning colour               */
 }
 
 /* ── Layout ─────────────────────────────────────────────────────────────────── */
@@ -46,6 +47,33 @@ main {
 .page-header p { color: var(--text-muted); font-size: 1rem; }
 .accent { color: var(--accent-lt); }
 
+/* ── Status banner (Firebase connection state) ─────────────────────────────── */
+.banner {
+  width: 100%;
+  max-width: 900px;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  text-align: center;
+  display: none;
+}
+.banner.visible { display: block; }
+.banner.info {
+  background: rgba(124,106,247,.12);
+  border: 1px solid rgba(124,106,247,.3);
+  color: var(--accent-lt);
+}
+.banner.warn {
+  background: rgba(224,178,92,.12);
+  border: 1px solid rgba(224,178,92,.35);
+  color: var(--warn);
+}
+.banner.error {
+  background: rgba(224,92,110,.12);
+  border: 1px solid rgba(224,92,110,.35);
+  color: var(--danger);
+}
+
 /* ── Panels ─────────────────────────────────────────────────────────────────── */
 .panel {
   background: var(--surface);
@@ -55,11 +83,6 @@ main {
   width: 100%;
   max-width: 900px;
 }
-/* The log table has more columns than the add-entry form needs room for
-   (username/show/season/episode/rating/notes/status/logged/actions), so it
-   gets a wider cap to avoid needing horizontal scroll at typical desktop
-   widths. */
-#log-panel { max-width: 1100px; }
 .panel-title {
   font-size: 1rem;
   font-weight: 700;
@@ -79,9 +102,8 @@ main {
   font-weight: 700;
 }
 
-/* ── Shared form field styling ──────────────────────────────────────────────── */
-.log-entry-form,
-.filter-bar {
+/* ── Add-show form ──────────────────────────────────────────────────────────── */
+.log-entry-form {
   display: flex;
   flex-wrap: wrap;
   gap: 0.9rem;
@@ -118,7 +140,7 @@ main {
 .form-input::placeholder { color: var(--text-muted); }
 select.form-input { cursor: pointer; }
 
-#log-entry-submit { flex: 0 0 auto; white-space: nowrap; }
+#add-show-submit { flex: 0 0 auto; white-space: nowrap; }
 
 /* ── Star rating ────────────────────────────────────────────────────────────── */
 /* Interactive input (add form) */
@@ -139,7 +161,7 @@ select.form-input { cursor: pointer; }
 .star:hover { transform: scale(1.15); }
 .star.filled { color: var(--star); }
 
-/* Read-only display (table cells) */
+/* Read-only / interactive display (show cards) */
 .stars-display { display: inline-flex; gap: 1px; }
 .star-display {
   font-size: 0.9rem;
@@ -147,6 +169,17 @@ select.form-input { cursor: pointer; }
   line-height: 1;
 }
 .star-display.filled { color: var(--star); }
+.card-rating-star {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.1rem;
+  font-size: 1.1rem;
+  color: var(--border);
+  transition: color var(--transition), transform var(--transition);
+}
+.card-rating-star:hover { transform: scale(1.15); }
+.card-rating-star.filled { color: var(--star); }
 
 /* ── Buttons ────────────────────────────────────────────────────────────────── */
 .btn {
@@ -159,10 +192,7 @@ select.form-input { cursor: pointer; }
   border: none;
   font-family: inherit;
 }
-.btn-primary {
-  background: var(--accent);
-  color: #fff;
-}
+.btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { background: var(--accent-lt); color: #fff; }
 .btn-ghost {
   background: transparent;
@@ -170,26 +200,8 @@ select.form-input { cursor: pointer; }
   color: var(--text-muted);
 }
 .btn-ghost:hover { border-color: var(--accent-lt); color: var(--accent-lt); }
-.btn-danger {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  padding: 0.3rem 0.6rem;
-  border-radius: 8px;
-}
-.btn-danger:hover {
-  color: var(--danger);
-  background: rgba(224,92,110,.12);
-  border-color: rgba(224,92,110,.3);
-}
-.btn-sm {
-  font-size: 0.8rem;
-  padding: 0.42rem 0.8rem;
-}
+.btn-sm { font-size: 0.8rem; padding: 0.42rem 0.8rem; }
 
-/* Compact square icon buttons used in the table's actions column, where
-   space is tight and a tooltip (title attribute) carries the label. */
 .btn-icon {
   width: 1.8rem;
   height: 1.8rem;
@@ -203,62 +215,56 @@ select.form-input { cursor: pointer; }
   color: var(--text-muted);
   border-radius: 8px;
 }
-.btn-icon + .btn-icon { margin-left: 0.4rem; }
-.btn-icon:hover { border-color: var(--accent-lt); color: var(--accent-lt); }
-.btn-icon.toggle-status-btn:hover { border-color: var(--success); color: var(--success); }
-.btn-icon.toggle-status-btn.is-completed { color: var(--success); border-color: rgba(76,175,130,.35); }
 .btn-icon.btn-icon-danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(224,92,110,.12); }
 
-/* ── Filter bar ─────────────────────────────────────────────────────────────── */
-.filter-bar {
-  margin-bottom: 1.25rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--border);
+/* ── Show cards ─────────────────────────────────────────────────────────────── */
+#watching-list, #towatch-list, #completed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
 }
-#clear-filters-btn { flex: 0 0 auto; }
-
-/* ── Log table ──────────────────────────────────────────────────────────────── */
-/* Wraps the table so a table wider than the viewport scrolls within its own
-   box instead of stretching the whole page horizontally. */
-.table-scroll {
-  width: 100%;
-  overflow-x: auto;
+.show-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
 }
-
-.log-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.88rem;
+.show-card-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
+.show-title { font-weight: 700; font-size: 1.02rem; }
+.show-user { color: var(--text-muted); font-size: 0.82rem; white-space: nowrap; }
+.show-notes { color: var(--text-muted); font-size: 0.85rem; }
 
-.log-table th {
-  text-align: left;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
-  font-weight: 700;
-  padding: 0.6rem 0.75rem;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
+.show-progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
 }
-
-.log-table td {
-  padding: 0.65rem 0.75rem;
-  border-bottom: 1px solid var(--border);
-  vertical-align: middle;
+.progress-input {
+  width: 4.2rem;
+  padding: 0.4rem 0.5rem;
 }
 
-.log-table tbody tr:hover { background: rgba(255,255,255,.03); }
-.log-table tbody tr:last-child td { border-bottom: none; }
-
-.col-actions { width: 1%; text-align: right; white-space: nowrap; }
-
-.cell-username { font-weight: 700; color: var(--text); }
+.show-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.show-actions .btn-icon { margin-left: auto; }
 
 .cell-pill {
   display: inline-block;
-  background: var(--surface2);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 0.1rem 0.55rem;
@@ -266,39 +272,6 @@ select.form-input { cursor: pointer; }
   color: var(--accent-lt);
   font-weight: 700;
   white-space: nowrap;
-}
-
-.cell-notes {
-  display: block;
-  max-width: 260px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--text-muted);
-}
-.cell-notes-empty { opacity: 0.5; }
-
-.cell-date {
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  white-space: nowrap;
-}
-
-.status-badge {
-  display: inline-block;
-  font-size: 0.76rem;
-  font-weight: 700;
-  white-space: nowrap;
-  color: var(--text-muted);
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 0.15rem 0.6rem;
-}
-.status-badge.completed {
-  color: var(--success);
-  background: rgba(76,175,130,.15);
-  border-color: rgba(76,175,130,.3);
 }
 
 /* ── Empty state ────────────────────────────────────────────────────────────── */
@@ -326,45 +299,6 @@ footer {
   main { padding: 2rem 1rem 3rem; }
   .panel { padding: 1.25rem 1.25rem; }
   .form-field, .form-field-sm, .form-field-wide { flex: 1 1 100%; min-width: 0; }
-  #log-entry-submit { width: 100%; }
-  .filter-bar { flex-direction: column; align-items: stretch; }
-  #clear-filters-btn { width: 100%; }
-
-  /* Turn the table into a stack of labeled-row cards — a real <table> is
-     unreadable once most columns have to squeeze onto a 320px-wide screen. */
-  .log-table thead { display: none; }
-  .log-table, .log-table tbody, .log-table tr, .log-table td { display: block; width: 100%; }
-  .log-table tr {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    margin-bottom: 0.75rem;
-    padding: 0.5rem 0.9rem;
-    background: var(--surface2);
-  }
-  .log-table td {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding: 0.4rem 0;
-    border-bottom: 1px dashed var(--border);
-    text-align: right;
-  }
-  .log-table td:last-child { border-bottom: none; }
-  .log-table td::before {
-    content: attr(data-label);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--text-muted);
-    font-weight: 700;
-    text-align: left;
-  }
-  .log-table td.col-actions {
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  .log-table td.col-actions::before { content: none; }
-  .cell-notes { max-width: 70%; text-align: right; }
+  #add-show-submit { width: 100%; }
+  .show-actions .btn-icon { margin-left: 0; }
 }

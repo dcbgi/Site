@@ -18,130 +18,84 @@
 
     <div class="page-header">
       <h1>📺 <span class="accent">TV Show Tracker</span></h1>
-      <p>Log who watched what, and search the shared log</p>
+      <p>Track what you're watching, what's next, and what you loved — synced across devices</p>
     </div>
 
+    <div class="banner" id="status-banner" role="status"></div>
+
     <div class="panel" id="add-panel">
-      <div class="panel-title">Log a Watch</div>
-      <form class="log-entry-form" id="log-entry-form" autocomplete="off">
+      <div class="panel-title">Add a Show</div>
+      <form class="log-entry-form" id="add-show-form" autocomplete="off">
         <div class="form-field">
           <label class="form-label" for="input-username">Username</label>
           <input class="form-input" type="text" id="input-username" placeholder="e.g. dcbgi" maxlength="60" required />
         </div>
+        <div class="form-field form-field-wide">
+          <label class="form-label" for="input-title">Show</label>
+          <input class="form-input" type="text" id="input-title" placeholder="e.g. Severance" maxlength="120" required />
+        </div>
         <div class="form-field">
-          <label class="form-label" for="input-show">Show</label>
-          <input class="form-input" type="text" id="input-show" placeholder="e.g. Severance" maxlength="120" required />
+          <label class="form-label" for="input-status">Status</label>
+          <select class="form-input" id="input-status">
+            <option value="want_to_watch">📌 Want to Watch</option>
+            <option value="watching">▶ Currently Watching</option>
+            <option value="completed">✅ Completed</option>
+          </select>
         </div>
-        <div class="form-field form-field-sm">
+        <div class="form-field form-field-sm" id="field-season">
           <label class="form-label" for="input-season">Season</label>
-          <input class="form-input" type="number" id="input-season" min="1" max="999" placeholder="1" required />
+          <input class="form-input" type="number" id="input-season" min="1" max="999" value="1" />
         </div>
-        <div class="form-field form-field-sm">
+        <div class="form-field form-field-sm" id="field-episode">
           <label class="form-label" for="input-episode">Episode</label>
-          <input class="form-input" type="number" id="input-episode" min="1" max="999" placeholder="1" required />
+          <input class="form-input" type="number" id="input-episode" min="1" max="999" value="1" />
+        </div>
+        <div class="form-field" id="field-rating" style="display:none;">
+          <span class="form-label">Rating</span>
+          <div class="stars" id="rating-input" role="radiogroup" aria-label="Rating"></div>
         </div>
         <div class="form-field form-field-wide">
           <label class="form-label" for="input-notes">Notes <span class="optional-tag">(optional)</span></label>
-          <input class="form-input" type="text" id="input-notes" placeholder="Any thoughts on this episode…" maxlength="240" />
+          <input class="form-input" type="text" id="input-notes" placeholder="Any thoughts…" maxlength="240" />
         </div>
-        <div class="form-field">
-          <span class="form-label">Rating <span class="optional-tag">(optional)</span></span>
-          <div class="stars" id="rating-input" role="radiogroup" aria-label="Episode rating"></div>
-        </div>
-        <button type="submit" class="btn btn-primary" id="log-entry-submit">+ Log Entry</button>
+        <button type="submit" class="btn btn-primary" id="add-show-submit">+ Add Show</button>
       </form>
     </div>
 
-    <div class="panel" id="log-panel">
-      <div class="panel-title">
-        Watch Log
-        <span class="badge" id="record-count">0</span>
+    <div class="panel" id="watching-panel">
+      <div class="panel-title">▶ Currently Watching <span class="badge" id="watching-count">0</span></div>
+      <div id="watching-list"></div>
+      <div class="empty-state" id="watching-empty-state" style="display:none;">
+        <div class="empty-icon">📺</div>
+        <p>Nothing in progress — add a show above!</p>
       </div>
+    </div>
 
-      <div class="filter-bar" id="filter-bar">
-        <div class="form-field">
-          <label class="form-label" for="filter-username">Username</label>
-          <select class="form-input" id="filter-username">
-            <option value="">All users</option>
-          </select>
-        </div>
-        <div class="form-field">
-          <label class="form-label" for="filter-show">Show</label>
-          <select class="form-input" id="filter-show">
-            <option value="">All shows</option>
-          </select>
-        </div>
-        <div class="form-field form-field-sm">
-          <label class="form-label" for="filter-season">Season</label>
-          <select class="form-input" id="filter-season">
-            <option value="">All</option>
-          </select>
-        </div>
-        <div class="form-field form-field-sm">
-          <label class="form-label" for="filter-episode">Episode</label>
-          <select class="form-input" id="filter-episode">
-            <option value="">All</option>
-          </select>
-        </div>
-        <div class="form-field form-field-wide">
-          <label class="form-label" for="filter-notes">Notes contain</label>
-          <input class="form-input" type="text" id="filter-notes" placeholder="Search notes…" />
-        </div>
-        <div class="form-field form-field-sm">
-          <label class="form-label" for="filter-rating">Rating</label>
-          <select class="form-input" id="filter-rating">
-            <option value="">All</option>
-            <option value="0">Unrated</option>
-            <option value="1">★ 1</option>
-            <option value="2">★ 2</option>
-            <option value="3">★ 3</option>
-            <option value="4">★ 4</option>
-            <option value="5">★ 5</option>
-          </select>
-        </div>
-        <div class="form-field">
-          <label class="form-label" for="filter-status">Status</label>
-          <select class="form-input" id="filter-status">
-            <option value="">All</option>
-            <option value="watching">Watching</option>
-            <option value="completed">Completed</option>
-          </select>
-        </div>
-        <button type="button" class="btn btn-ghost btn-sm" id="clear-filters-btn">Clear Filters</button>
+    <div class="panel" id="towatch-panel">
+      <div class="panel-title">📌 Want to Watch <span class="badge" id="towatch-count">0</span></div>
+      <div id="towatch-list"></div>
+      <div class="empty-state" id="towatch-empty-state" style="display:none;">
+        <div class="empty-icon">📋</div>
+        <p>Your watchlist is empty.</p>
       </div>
+    </div>
 
-      <div class="table-scroll">
-        <table class="log-table" id="log-table">
-          <thead>
-            <tr>
-              <th>Username</th>
-              <th>Show</th>
-              <th>Season</th>
-              <th>Episode</th>
-              <th>Rating</th>
-              <th>Notes</th>
-              <th>Status</th>
-              <th>Logged</th>
-              <th class="col-actions"></th>
-            </tr>
-          </thead>
-          <tbody id="log-tbody"></tbody>
-        </table>
-      </div>
-
-      <div class="empty-state" id="log-empty-state" style="display:none;">
-        <div class="empty-icon">📭</div>
-        <p id="log-empty-text">No records logged yet.</p>
+    <div class="panel" id="completed-panel">
+      <div class="panel-title">✅ Completed <span class="badge" id="completed-count">0</span></div>
+      <div id="completed-list"></div>
+      <div class="empty-state" id="completed-empty-state" style="display:none;">
+        <div class="empty-icon">🏁</div>
+        <p>No completed shows yet.</p>
       </div>
     </div>
 
   </main>
 
   <footer>
-    <p>&copy; <span id="year"></span> dcbgi. TV Show Tracker — data saved in your browser.</p>
+    <p>&copy; <span id="year"></span> dcbgi. TV Show Tracker — shared live via Firebase.</p>
   </footer>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 
 </body>
 </html>
