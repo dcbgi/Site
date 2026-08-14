@@ -35,6 +35,13 @@ const projects = [
     github: "https://github.com/dcbgi/CodeCracker",
     demo: "experiences/codecracker/index.html",
   },
+  {
+    title: "Book Challenge",
+    icon: "📚",
+    desc: "Shared reading challenge for a group — log books and pages, and watch a live scoreboard rank everyone's progress toward their own yearly goal.",
+    tags: ["HTML", "CSS", "JavaScript", "Firebase"],
+    demo: "experiences/bookchallenge/index.html",
+  },
 ];
 
 // `moreProjects` — everything else, shown on the secondary page (more.html),
@@ -60,13 +67,6 @@ const moreProjects = [
     desc: "Pick a mood and watch the matching emoji explode onto the screen — a tiny interactive check-in built with vanilla HTML, CSS, and JavaScript.",
     tags: ["HTML", "CSS", "JavaScript"],
     demo: "experiences/howsyourday/index.html",
-  },
-  {
-    title: "Book Challenge",
-    icon: "📚",
-    desc: "Shared reading challenge for a group — log books and pages, and watch a live scoreboard rank everyone's progress toward their own yearly goal.",
-    tags: ["HTML", "CSS", "JavaScript", "Firebase"],
-    demo: "experiences/bookchallenge/index.html",
   },
   // ── Add more projects below ──
   // {
