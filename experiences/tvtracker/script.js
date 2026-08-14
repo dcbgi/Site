@@ -10,9 +10,13 @@
 // (want to watch / watching / completed), current season+episode, rating,
 // and notes — editing progress is a couple of clicks, not a new form entry.
 //
-// See firebase-config.js for one-time setup instructions, and
-// firestore.rules.txt for the security rules to publish. OWNER_EMAIL below
-// must match the email hardcoded into firestore.rules.txt's isOwner().
+// See firebase-config.js for one-time setup instructions. The Firestore
+// security rules (published in the Firebase console, not stored in this
+// repo) are what actually check the owner's email — this file never
+// contains it, since script.js is public client code every visitor
+// downloads. Client-side isOwner is just "signed in with Google" for UI
+// purposes; a non-owner account gets a permission-denied error from
+// Firestore itself when it tries to write.
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
@@ -23,9 +27,6 @@ import {
   getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { firebaseConfig } from "./firebase-config.js";
-
-// Replace with your Google account email — must match firestore.rules.txt.
-var OWNER_EMAIL = "deiondreaberry@example.com";
 
 // ── esc ───────────────────────────────────────────────────────────────────
 function esc(str) {
@@ -80,6 +81,14 @@ function showBanner(text, kind) {
 function hideBanner() {
   document.getElementById("status-banner").className = "banner";
 }
+// Turns a raw Firebase error into a clearer message — a permission-denied
+// write means "signed in, but not as the owner account", not a bug.
+function friendlyError(prefix, err) {
+  if (err && err.code === "permission-denied") {
+    return prefix + " Only the owner's Google account can do that.";
+  }
+  return prefix + " " + err.message;
+}
 function updateAuthUi(user) {
   var signInBtn = document.getElementById("sign-in-btn");
   var signOutBtn = document.getElementById("sign-out-btn");
@@ -113,7 +122,7 @@ if (configIsPlaceholder) {
     auth = getAuth(app);
 
     onAuthStateChanged(auth, function (user) {
-      isOwner = !!(user && user.email === OWNER_EMAIL);
+      isOwner = !!user;
       updateAuthUi(user);
       renderAll(); // Re-render so owner-only controls appear/disappear
     });
@@ -295,7 +304,7 @@ document.getElementById("add-show-form").addEventListener("submit", function (e)
     rating: rating,
     notes: notes,
     updatedAt: serverTimestamp(),
-  }).catch(function (err) { showBanner("⚠️ Couldn't add show: " + err.message, "error"); });
+  }).catch(function (err) { showBanner(friendlyError("⚠️ Couldn't add show:", err), "error"); });
 
   titleEl.value = "";
   seasonEl.value = "1";
@@ -310,7 +319,7 @@ document.getElementById("add-show-form").addEventListener("submit", function (e)
 function updateShow(showId, fields) {
   if (!db || !isOwner) { showBanner("⚠️ Sign in as the owner to make changes.", "warn"); return; }
   updateDoc(doc(db, "shows", showId), Object.assign({}, fields, { updatedAt: serverTimestamp() }))
-    .catch(function (err) { showBanner("⚠️ Couldn't update show: " + err.message, "error"); });
+    .catch(function (err) { showBanner(friendlyError("⚠️ Couldn't update show:", err), "error"); });
 }
 function findShow(showId) {
   return shows.find(function (s) { return s.id === showId; });
@@ -351,7 +360,7 @@ document.getElementById("watching-list").addEventListener("click", function (e) 
   if (del) {
     if (!confirm("Delete this show?")) return;
     deleteDoc(doc(db, "shows", del.dataset.showId))
-      .catch(function (err) { showBanner("⚠️ Couldn't delete show: " + err.message, "error"); });
+      .catch(function (err) { showBanner(friendlyError("⚠️ Couldn't delete show:", err), "error"); });
   }
 });
 
@@ -366,7 +375,7 @@ document.getElementById("towatch-list").addEventListener("click", function (e) {
   if (del) {
     if (!confirm("Delete this show?")) return;
     deleteDoc(doc(db, "shows", del.dataset.showId))
-      .catch(function (err) { showBanner("⚠️ Couldn't delete show: " + err.message, "error"); });
+      .catch(function (err) { showBanner(friendlyError("⚠️ Couldn't delete show:", err), "error"); });
   }
 });
 
@@ -390,7 +399,7 @@ document.getElementById("completed-list").addEventListener("click", function (e)
   if (del) {
     if (!confirm("Delete this show?")) return;
     deleteDoc(doc(db, "shows", del.dataset.showId))
-      .catch(function (err) { showBanner("⚠️ Couldn't delete show: " + err.message, "error"); });
+      .catch(function (err) { showBanner(friendlyError("⚠️ Couldn't delete show:", err), "error"); });
   }
 });
 
