@@ -247,8 +247,54 @@ select.form-input { cursor: pointer; }
   flex-wrap: wrap;
 }
 .show-title { font-weight: 700; font-size: 1.02rem; }
-.show-user { color: var(--text-muted); font-size: 0.82rem; white-space: nowrap; }
 .show-notes { color: var(--text-muted); font-size: 0.85rem; }
+
+.rating-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.rating-label {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.rating-summary {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+.rating-summary-empty { opacity: 0.6; }
+
+.watch-history {
+  border-top: 1px solid var(--border);
+  padding-top: 0.6rem;
+  margin-top: 0.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.watch-history-title {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+.watch-history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.watch-history-empty {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  opacity: 0.7;
+}
 
 .show-progress {
   display: flex;

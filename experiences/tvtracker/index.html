@@ -31,10 +31,6 @@
     <div class="panel" id="add-panel" style="display:none;">
       <div class="panel-title">Add a Show</div>
       <form class="log-entry-form" id="add-show-form" autocomplete="off">
-        <div class="form-field">
-          <label class="form-label" for="input-username">Username</label>
-          <input class="form-input" type="text" id="input-username" placeholder="e.g. dcbgi" maxlength="60" required />
-        </div>
         <div class="form-field form-field-wide">
           <label class="form-label" for="input-title">Show</label>
           <input class="form-input" type="text" id="input-title" placeholder="e.g. Severance" maxlength="120" required />
@@ -56,8 +52,8 @@
           <input class="form-input" type="number" id="input-episode" min="1" max="999" value="1" />
         </div>
         <div class="form-field" id="field-rating" style="display:none;">
-          <span class="form-label">Rating</span>
-          <div class="stars" id="rating-input" role="radiogroup" aria-label="Rating"></div>
+          <span class="form-label">Show Rating</span>
+          <div class="stars" id="rating-input" role="radiogroup" aria-label="Show rating"></div>
         </div>
         <div class="form-field form-field-wide">
           <label class="form-label" for="input-notes">Notes <span class="optional-tag">(optional)</span></label>
