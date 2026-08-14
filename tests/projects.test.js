@@ -5,7 +5,7 @@
 
 const fs   = require("fs");
 const path = require("path");
-const { projects, renderProjects, escapeHtml } = require("../script.js");
+const { projects, moreProjects, renderProjects, escapeHtml } = require("../script.js");
 
 // ─── Nav-logo home link ───────────────────────────────────────────────────────
 
@@ -31,13 +31,16 @@ describe("index.html nav-logo", () => {
 
 // ─── Project data schema ──────────────────────────────────────────────────────
 
-describe("projects array", () => {
+describe.each([
+  ["projects", projects],
+  ["moreProjects", moreProjects],
+])("%s array", (arrayName, list) => {
   test("is a non-empty array", () => {
-    expect(Array.isArray(projects)).toBe(true);
-    expect(projects.length).toBeGreaterThan(0);
+    expect(Array.isArray(list)).toBe(true);
+    expect(list.length).toBeGreaterThan(0);
   });
 
-  projects.forEach((project, index) => {
+  list.forEach((project, index) => {
     describe(`project[${index}] "${project.title ?? "(no title)"}"`, () => {
       test("has a non-empty string title", () => {
         expect(typeof project.title).toBe("string");
@@ -93,11 +96,14 @@ describe("projects array", () => {
 // After extracting inline styles and scripts to separate files, each HTML page
 // must reference those files via <link> and <script src="..."> tags.
 
-describe("index.html external assets", () => {
+describe.each([
+  ["index.html", "index.html"],
+  ["more.html", "more.html"],
+])("%s external assets", (label, file) => {
   let doc;
 
   beforeAll(() => {
-    const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+    const html = fs.readFileSync(path.join(__dirname, "..", file), "utf8");
     doc = new DOMParser().parseFromString(html, "text/html");
   });
 
@@ -113,6 +119,27 @@ describe("index.html external assets", () => {
 
   test("has no inline <style> block", () => {
     expect(doc.querySelectorAll("style").length).toBe(0);
+  });
+});
+
+describe("more.html navigation", () => {
+  let doc;
+
+  beforeAll(() => {
+    const html = fs.readFileSync(path.join(__dirname, "..", "more.html"), "utf8");
+    doc = new DOMParser().parseFromString(html, "text/html");
+  });
+
+  test("nav-logo links back to index.html", () => {
+    const logo = doc.querySelector(".nav-logo");
+    expect(logo).not.toBeNull();
+    expect(logo.getAttribute("href")).toBe("index.html");
+  });
+
+  test("nav-back link points to index.html", () => {
+    const back = doc.querySelector(".nav-back");
+    expect(back).not.toBeNull();
+    expect(back.getAttribute("href")).toBe("index.html");
   });
 });
 
@@ -245,22 +272,25 @@ describe("sub-page back links point to index.html", () => {
   });
 });
 
-describe("index.html links forward to every local demo page", () => {
-  let indexDoc;
+describe.each([
+  ["index.html", projects, "projects-grid"],
+  ["more.html", moreProjects, "more-projects-grid"],
+])("%s links forward to every local demo page", (label, list, containerId) => {
+  let pageDoc;
 
   beforeAll(() => {
-    document.body.innerHTML = '<div id="projects-grid"></div>';
-    renderProjects();
-    indexDoc = document;
+    document.body.innerHTML = `<div id="${containerId}"></div>`;
+    renderProjects(list, containerId);
+    pageDoc = document;
   });
 
-  const localDemos = projects
+  const localDemos = list
     .filter((p) => p.demo && !p.demo.startsWith("https://"))
     .map((p) => p.demo);
 
   localDemos.forEach((demoFile) => {
     test(`contains a link to ${demoFile}`, () => {
-      const links = [...indexDoc.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+      const links = [...pageDoc.querySelectorAll("a")].map((a) => a.getAttribute("href"));
       expect(links).toContain(demoFile);
     });
 

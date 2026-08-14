@@ -1,8 +1,7 @@
 // ─── Project Data ────────────────────────────────────────────────────────────
-// This array is the single source of truth for all project cards on the page.
-// To add a new project, append an object to this array following the schema below.
-// The renderProjects() function reads this array at page load and builds the
-// cards dynamically — no HTML edits are needed.
+// Two arrays are the single source of truth for all project cards on the site.
+// The renderProjects() function reads them at page load and builds the cards
+// dynamically — no HTML edits are needed.
 //
 // Each object supports the following fields:
 //   title    {string}   - Project name displayed as the card heading
@@ -11,14 +10,36 @@
 //   tags     {string[]} - Technology / language badges rendered below the description
 //   github   {string}   - Full HTTPS URL to the GitHub repo (optional)
 //   demo     {string}   - Live demo URL or same-site relative path (optional)
+
+// `projects` — the "true experiences" shown as tiles on the main hub (index.html).
 const projects = [
   {
     title: "Personal Profile Site",
     icon: "🌐",
     desc: "This website — a personal profile and project showcase built with vanilla HTML, CSS and JavaScript.",
     tags: ["HTML", "CSS", "JavaScript"],
-    github: "https://github.com/dcbgi/Site",
+    demo: "more.html",
   },
+  {
+    title: "TV Show Tracker",
+    icon: "🎬",
+    desc: "Personal TV show tracker — log every episode you watch, rate them with stars, and keep tabs on what you're currently watching or have completed.",
+    tags: ["HTML", "CSS", "JavaScript", "localStorage"],
+    demo: "experiences/tvtracker/index.html",
+  },
+  {
+    title: "Code Cracker",
+    icon: "🔐",
+    desc: "Break a secret four-colour code in seven attempts using positional and colour feedback after each guess.",
+    tags: ["HTML", "CSS", "JavaScript", "Game"],
+    github: "https://github.com/dcbgi/CodeCracker",
+    demo: "experiences/codecracker/index.html",
+  },
+];
+
+// `moreProjects` — everything else, shown on the secondary page (more.html),
+// reached by clicking the "Personal Profile Site" tile on the main hub.
+const moreProjects = [
   {
     title: "3D Robot Arm",
     icon: "🦾",
@@ -34,26 +55,11 @@ const projects = [
     github: "https://github.com/dcbgi/Tipper",
   },
   {
-    title: "TV Show Tracker",
-    icon: "🎬",
-    desc: "Personal TV show tracker — log every episode you watch, rate them with stars, and keep tabs on what you're currently watching or have completed.",
-    tags: ["HTML", "CSS", "JavaScript", "localStorage"],
-    demo: "experiences/tvtracker/index.html",
-  },
-  {
     title: "How's Your Day?",
     icon: "😊",
     desc: "Pick a mood and watch the matching emoji explode onto the screen — a tiny interactive check-in built with vanilla HTML, CSS, and JavaScript.",
     tags: ["HTML", "CSS", "JavaScript"],
     demo: "experiences/howsyourday/index.html",
-  },
-  {
-    title: "Code Cracker",
-    icon: "🔐",
-    desc: "Break a secret four-colour code in seven attempts using positional and colour feedback after each guess.",
-    tags: ["HTML", "CSS", "JavaScript", "Game"],
-    github: "https://github.com/dcbgi/CodeCracker",
-    demo: "experiences/codecracker/index.html",
   },
   // ── Add more projects below ──
   // {
@@ -67,20 +73,22 @@ const projects = [
 ];
 
 // ─── Render Projects ─────────────────────────────────────────────────────────
-// Reads the projects array and injects one <article class="project-card">
-// element per entry into the #projects-grid container in index.html.
-// Called once on DOMContentLoaded. Safe to call again if the array changes
-// (e.g. in tests) — it fully replaces the grid innerHTML each time.
-function renderProjects() {
-  const grid = document.getElementById("projects-grid");
+// Reads a project list and injects one tile per entry into the given grid
+// container. Defaults to rendering `projects` into "#projects-grid" (the main
+// hub in index.html); pass `moreProjects` and "more-projects-grid" to render
+// the secondary page instead. Called once on DOMContentLoaded per grid present
+// on the page. Safe to call again if the array changes (e.g. in tests) — it
+// fully replaces the grid innerHTML each time.
+function renderProjects(list = projects, containerId = "projects-grid") {
+  const grid = document.getElementById(containerId);
   if (!grid) return;
 
-  if (projects.length === 0) {
+  if (list.length === 0) {
     grid.innerHTML = `<p class="empty-state">No experiences yet — check back soon!</p>`;
     return;
   }
 
-  grid.innerHTML = projects
+  grid.innerHTML = list
     .map((p) => {
       const href = p.demo || p.github || "#";
       const isExternal = !p.demo;
@@ -126,8 +134,9 @@ function setYear() {
 // Wait for the full DOM to be parsed before touching any elements.
 // DOMContentLoaded fires before images/stylesheets load, so this is fast.
 document.addEventListener("DOMContentLoaded", () => {
-  renderProjects(); // Populate the projects grid
-  setYear();        // Stamp the footer with the current year
+  renderProjects(projects, "projects-grid");            // Main hub tiles (index.html)
+  renderProjects(moreProjects, "more-projects-grid");    // Secondary page tiles (more.html)
+  setYear();                                              // Stamp the footer with the current year
 });
 
 // ─── Test exports (Node / Jest only) ─────────────────────────────────────────
@@ -135,5 +144,5 @@ document.addEventListener("DOMContentLoaded", () => {
 // public API so tests can inspect the data and call the functions directly.
 // The typeof guard prevents errors in the browser where `module` is undefined.
 if (typeof module !== "undefined") {
-  module.exports = { projects, renderProjects, escapeHtml };
+  module.exports = { projects, moreProjects, renderProjects, escapeHtml };
 }

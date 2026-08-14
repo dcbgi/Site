@@ -38,6 +38,15 @@
   margin-bottom: 2rem;
 }
 
+/* Back-to-home link shown in the navbar on secondary pages (e.g. more.html) */
+.nav-back {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+.nav-back:hover { color: var(--text); }
+
 /* ── Experience grid ────────────────────────────────────────────────────────── */
 .experiences-grid {
   display: grid;
