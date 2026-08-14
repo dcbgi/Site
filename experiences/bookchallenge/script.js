@@ -50,6 +50,11 @@ function totalCreditsFor(readerName, entries, baseline) {
     .filter(function (e) { return e.readerName === readerName; })
     .reduce(function (sum, e) { return sum + bookCredit(e.pages, baseline); }, 0);
 }
+function actualBooksFor(readerName, entries) {
+  return entries.filter(function (e) { return e.readerName === readerName; }).length;
+}
+
+var showAdjusted = false; // Toggled by the "Show adjusted score" checkbox
 
 // ── Firebase init ─────────────────────────────────────────────────────────
 var configIsPlaceholder = Object.keys(firebaseConfig).some(function (key) {
@@ -136,22 +141,32 @@ function renderScoreboard() {
 
   var ranked = readers
     .map(function (r) {
-      var credits = totalCreditsFor(r.name, entries, baseline);
-      var pct = r.goalBooks > 0 ? Math.min(100, (credits / r.goalBooks) * 100) : 0;
-      return { reader: r, credits: credits, pct: pct };
+      var actual = actualBooksFor(r.name, entries);
+      var adjusted = totalCreditsFor(r.name, entries, baseline);
+      var actualPct = r.goalBooks > 0 ? Math.min(100, (actual / r.goalBooks) * 100) : 0;
+      var adjustedPct = r.goalBooks > 0 ? Math.min(100, (adjusted / r.goalBooks) * 100) : 0;
+      return { reader: r, actual: actual, adjusted: adjusted, actualPct: actualPct, adjustedPct: adjustedPct };
     })
-    .sort(function (a, b) { return b.pct - a.pct; });
+    .sort(function (a, b) { return b.adjustedPct - a.adjustedPct; });
 
   list.innerHTML = ranked.map(function (row, i) {
-    var complete = row.pct >= 100;
     return (
       '<div class="score-row">' +
         '<div class="score-row-top">' +
           '<span><span class="score-rank">#' + (i + 1) + "</span>" +
           '<span class="score-name">' + esc(row.reader.name) + "</span></span>" +
-          '<span class="score-detail">' + row.credits.toFixed(1) + " / " + row.reader.goalBooks + " books (" + Math.round(row.pct) + "%)</span>" +
+          '<span class="score-goal">Goal: ' + esc(row.reader.goalBooks) + " books</span>" +
         "</div>" +
-        '<div class="progress-track"><div class="progress-fill' + (complete ? " complete" : "") + '" style="width:' + row.pct + '%"></div></div>' +
+        '<div class="score-metric">' +
+          '<span class="score-metric-label"><span class="metric-name">Actual</span><span>' + row.actual + " / " + row.reader.goalBooks + " books (" + Math.round(row.actualPct) + "%)</span></span>" +
+          '<div class="progress-track"><div class="progress-fill' + (row.actualPct >= 100 ? " complete" : "") + '" style="width:' + row.actualPct + '%"></div></div>' +
+        "</div>" +
+        (showAdjusted
+          ? '<div class="score-metric">' +
+              '<span class="score-metric-label"><span class="metric-name">Adjusted</span><span>' + row.adjusted.toFixed(1) + " / " + row.reader.goalBooks + " books (" + Math.round(row.adjustedPct) + "%)</span></span>" +
+              '<div class="progress-track"><div class="progress-fill adjusted' + (row.adjustedPct >= 100 ? " complete" : "") + '" style="width:' + row.adjustedPct + '%"></div></div>' +
+            "</div>"
+          : "") +
       "</div>"
     );
   }).join("");
@@ -240,7 +255,7 @@ function populateReaderSelect() {
   if (readers.some(function (r) { return r.name === current; })) select.value = current;
 }
 
-// ── Add reader ──────────────────────────────────────────────────────────────
+// ── Add reader ───────────────────────────────────────────────────────────
 document.getElementById("reader-form").addEventListener("submit", function (e) {
   e.preventDefault();
   if (!db || !currentUid) { showBanner("⚠️ Still connecting — try again in a moment.", "warn"); return; }
@@ -318,6 +333,12 @@ document.getElementById("log-tbody").addEventListener("click", function (e) {
 
   deleteDoc(doc(db, "entries", btn.dataset.entryId))
     .catch(function (err) { showBanner("⚠️ Couldn't delete entry: " + err.message, "error"); });
+});
+
+// ── Toggle the Adjusted metric ─────────────────────────────────────────────
+document.getElementById("toggle-adjusted").addEventListener("change", function (e) {
+  showAdjusted = e.target.checked;
+  renderScoreboard();
 });
 
 // ── Footer year ───────────────────────────────────────────────────────────
