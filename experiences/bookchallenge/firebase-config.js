@@ -21,4 +21,4 @@ export const firebaseConfig = {
 //      "Enforce". (Enforcing before step 3 is deployed will break writes
 //      for everyone, since their browsers won't have a valid App Check
 //      token yet.)
-export const recaptchaSiteKey = "hhhhhhhjjjjjjj";
+export const recaptchaSiteKey = "6LctWYUtAAAAAHT9dhEjhK7l9jvCX9qPPqQvEPP5";
