@@ -25,7 +25,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
-  getFirestore, collection, addDoc, updateDoc, doc,
+  getFirestore, collection, addDoc, updateDoc, doc, increment,
   onSnapshot, query, where, orderBy, getDocs, serverTimestamp, writeBatch,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import {
@@ -400,16 +400,23 @@ document.getElementById("toggle-hidden-btn").addEventListener("click", function 
 // categories, so form-added and browser-imported links still work. The hide
 // button lives on each card, so hiding works at any nesting depth.
 
-// Orders group keys by how many bookmarks each contains (most first). Ties are
-// broken alphabetically. "Welcome" is pinned to the very top when present.
-// `countOf(key)` returns the bookmark count for a given key.
-function orderByCount(keys, countOf) {
+// Orders group keys by total clicks across the bookmarks they contain (most
+// first). Ties are broken alphabetically. "Welcome" is pinned to the top when
+// present. `clicksOf(key)` returns the summed click count for a given key.
+function orderByClicks(keys, clicksOf) {
   return keys.slice().sort(function (a, b) {
     if (a === "Welcome") return -1;
     if (b === "Welcome") return 1;
-    var d = countOf(b) - countOf(a);   // bigger count first
+    var d = clicksOf(b) - clicksOf(a);   // more clicks first
     return d !== 0 ? d : a.localeCompare(b);
   });
+}
+
+// A single bookmark's click count (missing/old docs count as 0).
+function clicksOfBookmark(b) { return (b && b.clicks) || 0; }
+// Sum of clicks across a list of bookmarks.
+function sumClicks(list) {
+  return list.reduce(function (t, b) { return t + clicksOfBookmark(b); }, 0);
 }
 
 // Collapsible group open/closed state, remembered per group in localStorage so
@@ -433,7 +440,7 @@ function cardHtml(b) {
   var host = hostLabel(b.url);
   var isHidden = !!b.hidden;
   return (
-    '<div class="bm-card' + (isHidden ? ' bm-card-hidden' : '') + '">' +
+    '<div class="bm-card' + (isHidden ? ' bm-card-hidden' : '') + '" data-id="' + esc(b.id) + '">' +
       '<a class="bm-link" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">' +
         '<span class="bm-title">' + esc(b.title) + '</span>' +
         (host ? '<span class="bm-host">' + esc(host) + '</span>' : "") +
@@ -484,12 +491,13 @@ function render() {
   emptyState.hidden = true;
 
   // Build a two-level tree:
-  //   tree[top] = { direct: [cards], subs: { subName: [cards] } }
+  //   tree[top] = { direct: [cards], subs: { subName: [cards] }, clicks }
   // A bookmark with a `group` goes under group → category; one without a group
-  // goes directly under its category (a flat top-level section).
+  // goes directly under its category (a flat top-level section). `clicks` is
+  // the running total used to order groups by popularity.
   var tree = {};
   function topNode(name) {
-    if (!tree[name]) tree[name] = { direct: [], subs: {}, count: 0 };
+    if (!tree[name]) tree[name] = { direct: [], subs: {}, count: 0, clicks: 0 };
     return tree[name];
   }
   filtered.forEach(function (b) {
@@ -498,17 +506,27 @@ function render() {
       var node = topNode(b.group);
       (node.subs[cat] = node.subs[cat] || []).push(b);
       node.count++;
+      node.clicks += clicksOfBookmark(b);
     } else {
       var node2 = topNode(cat);
       node2.direct.push(b);
       node2.count++;
+      node2.clicks += clicksOfBookmark(b);
     }
+  });
+
+  // Sort each bucket's cards by clicks (most-clicked first) so the links you use
+  // most float to the top within their category.
+  function byClicksDesc(a, b) { return clicksOfBookmark(b) - clicksOfBookmark(a); }
+  Object.keys(tree).forEach(function (t) {
+    tree[t].direct.sort(byClicksDesc);
+    Object.keys(tree[t].subs).forEach(function (s) { tree[t].subs[s].sort(byClicksDesc); });
   });
 
   // When a search is active, force every group open so matches are visible.
   var searching = !!searchTerm;
 
-  container.innerHTML = orderByCount(Object.keys(tree), function (k) { return tree[k].count; }).map(function (top) {
+  container.innerHTML = orderByClicks(Object.keys(tree), function (k) { return tree[k].clicks; }).map(function (top) {
     var node = tree[top];
     var inner = "";
 
@@ -516,8 +534,8 @@ function render() {
     if (node.direct.length) {
       inner += '<div class="bm-grid">' + node.direct.map(cardHtml).join("") + '</div>';
     }
-    // Then each sub-category as its own collapsible block, most-populated first.
-    orderByCount(Object.keys(node.subs), function (k) { return node.subs[k].length; }).forEach(function (sub) {
+    // Then each sub-category as its own collapsible block, most-clicked first.
+    orderByClicks(Object.keys(node.subs), function (k) { return sumClicks(node.subs[k]); }).forEach(function (sub) {
       var subCards = node.subs[sub];
       var subKey = top + "\u241f" + sub;              // unit-separator avoids clashes
       var subOpen = searching || isGroupOpen(subKey);
@@ -556,6 +574,20 @@ document.getElementById("bookmarks-container").addEventListener("click", functio
   if (!btn) return;
   var isHidden = btn.dataset.hidden === "true";
   setHidden(btn.dataset.id, !isHidden);
+});
+
+// Count a click when a bookmark link is opened, so popularity ordering can
+// float your most-used links up. Links open in a new tab (target="_blank"), so
+// this page stays alive to finish the async Firestore update. Uses an atomic
+// increment so concurrent opens across devices don't clobber each other.
+document.getElementById("bookmarks-container").addEventListener("click", function (e) {
+  var link = e.target.closest(".bm-link");
+  if (!link) return;
+  var card = link.closest(".bm-card");
+  var id = card && card.getAttribute("data-id");
+  if (!id || !db) return;
+  updateDoc(doc(db, "bookmarks", id), { clicks: increment(1) })
+    .catch(function () { /* a failed click tally should never block navigation */ });
 });
 
 // ── Footer year ─────────────────────────────────────────────────────────────
