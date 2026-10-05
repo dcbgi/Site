@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bookmarks – dcbgi</title>
+  <link rel="stylesheet" href="../../shared.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="../../index.html" class="nav-logo">Berry Better Solutions</a>
+    <a href="../../index.html" class="nav-back">← Back to Home</a>
+  </nav>
+
+  <main>
+
+    <div class="page-header">
+      <h1>🔖 <span class="accent">Bookmarks</span></h1>
+      <p>Your private, signed-in collection of links</p>
+    </div>
+
+    <div class="banner" id="status-banner" role="status"></div>
+
+    <!-- ── Signed-out: login wall ─────────────────────────────────────────── -->
+    <section class="auth-gate" id="auth-gate" hidden>
+      <div class="auth-card">
+        <div class="auth-lock" aria-hidden="true">🔒</div>
+        <h2>These bookmarks are private</h2>
+        <p>Sign in with Google to open your own bookmark list. Everyone gets
+           their own private set — plus a few recommendations from me to start.</p>
+        <button type="button" class="btn btn-google" id="sign-in-btn">
+          <span class="g-icon" aria-hidden="true">G</span>
+          Sign in with Google
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Signed-in: the app ─────────────────────────────────────────────── -->
+    <section id="app" hidden>
+
+      <div class="account-row">
+        <span class="account-label">Signed in as <strong id="account-email">…</strong></span>
+        <div class="account-actions">
+          <button type="button" class="btn btn-ghost" id="import-mine-btn" hidden title="One-time import of your personal links into your private list">⬆ Import my bookmarks</button>
+          <button type="button" class="btn btn-ghost" id="sign-out-btn">Sign out</button>
+        </div>
+      </div>
+
+      <div class="panel" id="add-panel">
+        <div class="panel-title">Add a Bookmark</div>
+        <form class="bm-form" id="bookmark-form" autocomplete="off">
+          <div class="form-field form-field-wide">
+            <label class="form-label" for="input-title">Title</label>
+            <input class="form-input" type="text" id="input-title" placeholder="e.g. GitHub" maxlength="120" required />
+          </div>
+          <div class="form-field form-field-wide">
+            <label class="form-label" for="input-url">URL</label>
+            <input class="form-input" type="url" id="input-url" placeholder="https://…" maxlength="2000" required />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="input-category">Category</label>
+            <input class="form-input" type="text" id="input-category" list="category-list" placeholder="e.g. Work" maxlength="60" />
+            <datalist id="category-list"></datalist>
+          </div>
+          <button type="submit" class="btn btn-primary" id="bookmark-submit">+ Add</button>
+        </form>
+      </div>
+
+      <div class="toolbar">
+        <input class="form-input search-input" type="search" id="search-input"
+               placeholder="🔍 Search bookmarks…" aria-label="Search bookmarks" />
+        <button type="button" class="btn btn-ghost" id="toggle-hidden-btn" aria-pressed="false" hidden>👁 Show hidden</button>
+        <span class="badge" id="bookmark-count">0</span>
+      </div>
+
+      <div id="bookmarks-container"></div>
+
+      <div class="empty-state" id="bookmarks-empty-state" hidden>
+        <div class="empty-icon">🔖</div>
+        <p>No bookmarks match — add one above or clear your search.</p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer>
+    <p>&copy; <span id="year"></span> dcbgi. Bookmarks — private &amp; synced via Firebase.</p>
+  </footer>
+
+  <script type="module" src="script.js"></script>
+
+</body>
+</html>

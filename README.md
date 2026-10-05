@@ -11,7 +11,9 @@ A personal portfolio website that showcases projects I've built. The entire site
    - [Shared Design System](#shared-design-system-sharedcss)
    - [Main Portfolio Page](#main-portfolio-page-indexhtml--stylescsss--scriptjs)
    - [TV Show Tracker](#tv-show-tracker-experiencestvtrackerindexhtml--stylecss--scriptjs)
-   - [How's Your Day?](#hows-your-day-howsyourdayhtml--howsyourdaycss--howsyourdayjs)
+   - [Book Challenge](#book-challenge-experiencesbookchallengeindexhtml--stylecss--scriptjs--firebase-configjs)
+   - [Code Cracker](#code-cracker-experiencescodecrackerindexhtml--stylecss--scriptjs)
+   - [How's Your Day?](#hows-your-day-experienceshowsyourdayindexhtml--stylecss--scriptjs)
 3. [Adding a New Project](#adding-a-new-project)
 4. [Running Locally](#running-locally)
 5. [Testing](#testing)
@@ -24,15 +26,15 @@ A personal portfolio website that showcases projects I've built. The entire site
 | File | Purpose |
 |------|---------|
 | `shared.css` | Design tokens (CSS variables), reset, base body/link styles, and shared navbar — loaded first by every page |
-| `index.html` | Main portfolio page — hero/about section, projects grid, contact section |
-| `styles.css` | Layout, components, and styles specific to `index.html` |
-| `script.js` | Project data array + functions to render cards and set the footer year |
-| `experiences/tvtracker/index.html` | TV show watch-log app |
-| `experiences/tvtracker/style.css` | Page-specific styles (form/filter layout, table, mobile card view) |
-| `experiences/tvtracker/script.js` | Watch-log logic (localStorage, filtering, table rendering) |
-| `howsyourday.html` | Mood-check mini-app |
-| `howsyourday.css` | Page-specific styles for `howsyourday.html` (mood buttons, overlay, animations) |
-| `howsyourday.js` | Mood-check logic (mood button clicks, overlay show/hide, keyboard handling) |
+| `index.html` | Main portfolio page — personal welcome (greeting + quote + clock), experiences grid, and low-priority live feeds |
+| `styles.css` | Layout, components, and styles specific to `index.html` and `more.html` |
+| `script.js` | Project data arrays + functions to render cards and set the footer year |
+| `home.js` | Homepage behaviour — rotating regional greeting, philosopher quote, live clock, and lazy feed snippets from the Firebase experiences |
+| `more.html` | Secondary "More Projects" page — smaller builds reached from the main hub |
+| `experiences/tvtracker/` | TV show watch-log app (Firebase) — `index.html`, `style.css`, `script.js`, `firebase-config.js` |
+| `experiences/bookchallenge/` | Shared reading challenge (Firebase) — `index.html`, `style.css`, `script.js`, `firebase-config.js` |
+| `experiences/howsyourday/` | Mood-check mini-app — `index.html`, `style.css`, `script.js` |
+| `experiences/codecracker/` | Break-the-code game — `index.html`, `style.css`, `script.js` |
 | `tests/projects.test.js` | Jest tests for project data schema and rendering logic |
 
 ---
@@ -60,9 +62,12 @@ Each page then loads its own stylesheet on top of `shared.css` for page-specific
 
 ---
 
-### Main Portfolio Page (`index.html` + `styles.css` + `script.js`)
+### Main Portfolio Page (`index.html` + `styles.css` + `script.js` + `home.js`)
 
-These three files form the main portfolio page and are tightly coupled:
+The main hub is the landing page: a personal welcome header (rotating regional
+greeting, a philosopher quote, and a live clock) above the grid of experience
+tiles, with a low-priority strip of live feeds from the Firebase experiences at
+the bottom.
 
 ```
 Browser loads index.html
@@ -71,43 +76,49 @@ Browser loads index.html
   │     └── Design tokens, reset, base styles, shared navbar
   │
   ├── <link rel="stylesheet" href="styles.css" />
-  │     └── Main-page layout and components
-  │           (hero, project grid, contact section, footer, responsive rules)
+  │     └── Hub layout: welcome header, experience grid, feed strip,
+  │           footer, responsive rules
   │
-  └── <script src="script.js"></script>  (at bottom of <body>)
+  ├── <script src="script.js"></script>  (at bottom of <body>)
+  │     │
+  │     ├── projects[]      — main-hub tiles (data source)
+  │     ├── moreProjects[]  — secondary-page tiles (more.html)
+  │     │
+  │     ├── renderProjects(list, containerId)
+  │     │     • Builds one <a class="experience-tile"> per entry
+  │     │     • Calls escapeHtml() on every data-driven string (XSS protection)
+  │     │     • Injects into #projects-grid (index.html) or
+  │     │       #more-projects-grid (more.html)
+  │     │
+  │     ├── escapeHtml(str)  — &  <  >  "  '  → HTML entities
+  │     ├── setYear()        — stamps the current year into <span id="year">
+  │     └── DOMContentLoaded — renders both grids and sets the year
+  │
+  └── <script type="module" src="home.js"></script>
         │
-        ├── projects[]  — array of project objects (data source)
-        │
-        ├── renderProjects()
-        │     • Reads projects[]
-        │     • Builds one <article class="project-card"> per entry
-        │     • Calls escapeHtml() on every user-visible string (XSS protection)
-        │     • Injects the result into <div id="projects-grid"> in index.html
-        │
-        ├── escapeHtml(str)
-        │     • Converts &  <  >  "  ' to safe HTML entities
-        │     • Used by renderProjects() to prevent script injection
-        │
-        ├── setYear()
-        │     • Writes new Date().getFullYear() into <span id="year"> in the footer
-        │
-        └── DOMContentLoaded listener
-              • Calls renderProjects() and setYear() once the DOM is ready
+        ├── GREETINGS[] / QUOTES[]  — one of each picked per load
+        ├── renderIdentity()        — greeting + quote, drawn once
+        ├── renderWelcome()         — date + clock, ticks every second
+        └── loadFirestoreFeeds()    — lazily pulls Book Challenge + TV Tracker
+              snippets (public reads); skipped silently if a config is a
+              placeholder or the network is unavailable
 ```
 
-**Data flow:** The only place you ever edit to add or change a project is the `projects` array in `script.js`. On page load the browser parses `index.html`, applies `shared.css` then `styles.css`, then executes `script.js` which dynamically fills in the `#projects-grid` container that is left empty in the HTML.
+**Data flow:** The only place you edit to add or change a project is the
+`projects` (or `moreProjects`) array in `script.js`. On load the browser parses
+`index.html`, applies `shared.css` then `styles.css`, runs `script.js` to fill
+the tile grids, then `home.js` renders the welcome header and loads the feeds.
 
 ---
 
-### TV Show Tracker (`experiences/tvtracker/index.html` + `style.css` + `script.js`)
+### TV Show Tracker (`experiences/tvtracker/index.html` + `style.css` + `script.js` + `firebase-config.js`)
 
-A shared watch-log: anyone using the browser logs a row (username, show,
-season, episode, optional notes, optional star rating) and the table below
-is filterable by every column — e.g. pick one username to see everything
-they've logged, or a username **and** a show to narrow to just that pairing.
-Each row can also be marked "Completed" — this applies to the whole
-username+show pairing (not just that one episode), since every row sharing
-that pairing should agree on whether the show's been finished.
+A single-owner watch tracker backed by **Firebase Firestore**. Anyone can VIEW
+the tracker (public read), but adding, editing, or deleting a show requires
+signing in with **Google as the owner** — enforced by email in Firestore's
+security rules, not just "any authenticated user." One document per show tracks
+its status (want to watch / watching / completed), current season+episode, a
+per-episode watch-history log, an overall show rating, and notes.
 
 ```
 Browser loads index.html
@@ -116,85 +127,100 @@ Browser loads index.html
   │     └── Design tokens, reset, base styles, shared navbar
   │
   ├── <link rel="stylesheet" href="style.css" />
-  │     └── App-specific tokens (--danger, --success, --star), form/filter
-  │           layout, table styling, and a table→stacked-card layout under 640px
+  │     └── App tokens, form/filter layout, card grids, responsive rules
   │
-  └── <script src="script.js"></script>  (IIFE — Immediately Invoked Function Expression)
+  └── <script type="module" src="script.js"></script>
         │
-        ├── localStorage  ─────────────────────── Persistence layer (two keys)
-        │     • STORAGE_KEY        = "tvtracker_records"    — the log rows
-        │     • STORAGE_KEY_STATUS = "tvtracker_show_status" — completed pairs
-        │     • loadRecords()/saveRecords() and loadStatuses()/saveStatuses()
+        ├── Firebase init (from firebase-config.js)
+        │     • initializeApp(), getFirestore(), getAuth()
         │
-        ├── State variables
-        │     • records[]   — flat array of { id, username, show, season,
-        │                      episode, rating, notes, loggedAt }, one per watch
-        │     • statuses{}  — { "username␟show": "completed" }; a pairing with
-        │                      no entry is implicitly "watching"
-        │     • pendingRating — star value highlighted in the add form (0-5)
-        │     • filters{}   — active column filters (username/show/season/
-        │                      episode/rating = exact match, notes = substring,
-        │                      status = derived per-row via rowStatus())
+        ├── Auth (Google)
+        │     • onAuthStateChanged → sets isOwner, re-renders owner controls
+        │     • sign-in / sign-out buttons
         │
-        ├── Helper functions
-        │     • genId()          — generates a unique ID (timestamp + random suffix)
-        │     • esc()             — HTML-escapes user strings (XSS protection)
-        │     • fmtDate()         — formats a Unix timestamp to a locale date string
-        │     • uniqueSorted()    — distinct values of a field, for filter dropdowns
-        │     • populateSelect()  — rebuilds a <select>'s options, keeping the
-        │                           current selection if it still exists
-        │     • showKey() / rowStatus() / setCompleted() — key a (username, show)
-        │       pair, read its completed state, and toggle it for every row
-        │       that shares the pairing
-        │     • starsHtml() / ratingInputHtml() — read-only ★ display for table
-        │       cells vs. the 5 clickable star buttons in the add form
+        ├── Firestore "shows" collection
+        │     • onSnapshot(query(..., orderBy("updatedAt","desc"))) → live shows[]
+        │     • one doc per show: { title, status, season, episode,
+        │       episodeLog[], showRating, notes, updatedAt }
         │
-        ├── refreshFilterOptions()
-        │     • Rebuilds the username/show/season/episode dropdowns from the
-        │       full record set — called after add/delete, not on every filter
-        │       interaction, so an in-progress filter selection isn't reset.
-        │       Rating/Status filters have a fixed option set, defined in HTML.
+        ├── Episode log helpers
+        │     • withLoggedEpisode() / averageEpisodeRating() — per-episode
+        │       entries, each independently ratable
         │
-        ├── renderTable()
-        │     • Applies matchesFilters() to records[], sorts newest-first,
-        │       renders rows (or an empty state) and updates the count badge
+        ├── Rendering
+        │     • renderAll() → renderWatching() / renderToWatch() / renderCompleted()
         │
-        ├── Log-a-watch form submit listener
-        │     • Validates username/show/season/episode are present; notes and
-        │       rating stay optional; pushes a new record, saves, re-renders,
-        │       and clears the form (keeping the username filled in for quick
-        │       re-entry)
-        │
-        ├── Row actions (event delegation on the table body)
-        │     • toggle-status-btn flips the completed state for that row's
-        │       (username, show) pairing — every other row sharing it updates
-        │       on the next render
-        │     • delete-record-btn removes just that one row
-        │
-        ├── Filter listeners
-        │     • change on each dropdown / input on the notes search box
-        │       update filters{} and call renderTable()
-        │     • "Clear Filters" resets filters{} and every control
-        │
-        └── Delete-record listener (event delegation on the table body)
-              • Confirms, removes the record by id, saves, re-renders
+        └── Owner writes (addDoc / updateDoc / deleteDoc)
+              • Allowed only for the owner; a non-owner account gets a
+                permission-denied error straight from Firestore's rules
 ```
 
 ---
 
-### How's Your Day? (`howsyourday.html` + `howsyourday.css` + `howsyourday.js`)
+### Book Challenge (`experiences/bookchallenge/index.html` + `style.css` + `script.js` + `firebase-config.js`)
+
+A shared, cross-device reading challenge backed by **Firebase Firestore**. Every
+browser gets a silent **anonymous** auth session (no login UI); that session's
+uid tags anything it creates, which the security rules use to allow deleting
+only your own entries. The data is publicly readable — it's a shared scoreboard.
 
 ```
-Browser loads howsyourday.html
+Browser loads index.html
   │
-  ├── <link rel="stylesheet" href="shared.css" />
+  ├── shared.css + style.css
+  │
+  └── <script type="module" src="script.js"></script>
+        │
+        ├── Firebase init (+ optional App Check / reCAPTCHA v3)
+        ├── signInAnonymously() → silent session, uid tags created docs
+        │
+        ├── Firestore collections (both live via onSnapshot)
+        │     • "readers" — { name, goalBooks, creatorUid }
+        │     • "entries" — { readerName, title, pages, loggedAt, creatorUid }
+        │
+        ├── Scoring
+        │     • computeBaseline() — community average pages/book
+        │     • bookCredit() — a book's weight relative to that baseline
+        │
+        └── renderAll() → scoreboard, readers table, log table
+```
+
+---
+
+### Code Cracker (`experiences/codecracker/index.html` + `style.css` + `script.js`)
+
+A self-contained break-the-code game — no backend, no storage. Guess a 4-peg
+secret colour code in 7 attempts, with green/yellow feedback after each guess.
+
+```
+Browser loads index.html
+  │
+  ├── shared.css + style.css
+  │
+  └── <script src="script.js"></script>
+        │
+        ├── generateCode() — random 4-peg secret from 6 colours
+        ├── guess/feedback loop — green = right colour+spot, yellow = right
+        │     colour wrong spot; 7 attempts max
+        ├── endGame(won) — win/lose message + revealSecret()
+        └── newGame() — resets the board
+```
+
+---
+
+### How's Your Day? (`experiences/howsyourday/index.html` + `style.css` + `script.js`)
+
+```
+Browser loads experiences/howsyourday/index.html
+  │
+  ├── <link rel="stylesheet" href="../../shared.css" />
   │     └── Design tokens, reset, base styles, shared navbar
   │
-  ├── <link rel="stylesheet" href="howsyourday.css" />
+  ├── <link rel="stylesheet" href="style.css" />
   │     └── Layout (flex column body), mood buttons, emoji overlay,
   │           animations (@keyframes pop, fadein), footer
   │
-  └── <script src="howsyourday.js"></script>
+  └── <script src="script.js"></script>
         │
         ├── Mood button click listener (forEach on .mood-btn)
         │     1. Reads data-emoji and data-label from the clicked button

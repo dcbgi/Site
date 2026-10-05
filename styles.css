@@ -38,6 +38,161 @@
   margin-bottom: 2rem;
 }
 
+/* ── Personal welcome header ────────────────────────────────────────────────── */
+/* Greeting + live date/clock, filled in by home.js. Sits above everything so
+   the page feels like a personal start page rather than a portfolio landing. */
+.welcome {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.welcome-date {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+.welcome-greeting {
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0.15rem 0;
+  background: linear-gradient(90deg, var(--text), var(--accent-lt));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+/* Small region tag beside the slang greeting (e.g. "Yerr  NYC") */
+.greet-region {
+  -webkit-text-fill-color: initial;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+}
+/* Short philosopher quote under the greeting */
+.welcome-quote {
+  max-width: 44ch;
+  margin: 0.5rem auto 0.25rem;
+  color: var(--text);
+  font-size: 1.02rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+.quote-author {
+  display: inline;
+  font-style: normal;
+  color: var(--accent-lt);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.welcome-clock {
+  color: var(--accent-lt);
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* ── Featured Bookmarks hero (the daily driver) ─────────────────────────────── */
+/* The single most prominent element on the homepage — a wide quick-launch into
+   the private bookmark page. Deliberately bigger and more colourful than the
+   experience tiles so it reads as "the main thing" at a glance. */
+.bookmarks-hero {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 960px;
+  margin-bottom: 2.75rem;
+  padding: 1.5rem 1.75rem;
+  text-decoration: none;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(124,106,247,.35), transparent 60%),
+    linear-gradient(135deg, var(--surface2), var(--surface));
+  border: 1px solid rgba(124,106,247,.4);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 30px rgba(124,106,247,.12);
+  transition: transform var(--transition), box-shadow var(--transition),
+              border-color var(--transition);
+}
+.bookmarks-hero:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  box-shadow: 0 12px 40px rgba(124,106,247,.28);
+}
+.bookmarks-hero-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 16px;
+  background: rgba(124,106,247,.2);
+  font-size: 2rem;
+}
+.bookmarks-hero-text { display: flex; flex-direction: column; gap: 0.2rem; text-align: left; }
+.bookmarks-hero-title { font-size: 1.5rem; font-weight: 800; }
+.bookmarks-hero-sub { color: var(--text-muted); font-size: 0.95rem; }
+.bookmarks-hero-go {
+  margin-left: auto;
+  font-size: 1.75rem;
+  color: var(--accent-lt);
+  transition: transform var(--transition);
+}
+.bookmarks-hero:hover .bookmarks-hero-go { transform: translateX(6px); }
+
+/* ── Low-priority feed strip ────────────────────────────────────────────────── */
+/* Small glanceable snippets from the other experiences. Intentionally muted
+   and placed below the experience grid — a secondary convenience, not a focus. */
+.feeds {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 960px;
+  margin-top: 3rem;
+  opacity: 0.85;
+}
+.feed-card {
+  display: block;
+  padding: 1rem 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--text);
+  text-align: left;
+  transition: border-color var(--transition), transform var(--transition), opacity var(--transition);
+}
+.feed-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.feeds:hover { opacity: 1; }
+.feed-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+.feed-icon { font-size: 1rem; }
+.feed-body { font-size: 0.95rem; line-height: 1.5; color: var(--text); }
+.feed-body strong { color: var(--accent-lt); }
+.feed-meta { display: block; font-size: 0.78rem; color: var(--text-muted); margin-top: 0.15rem; }
+.feed-meta-inline { color: var(--text-muted); font-size: 0.82rem; }
+.feed-list { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+.feed-list li {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.9rem;
+}
+
 /* Back-to-home link shown in the navbar on secondary pages (e.g. more.html) */
 .nav-back {
   font-size: 0.9rem;
@@ -157,4 +312,6 @@
   .hub { padding: 3rem 1.25rem 3rem; }
   .experiences-grid { grid-template-columns: 1fr; }
   .experience-tile { padding: 2rem 1.25rem; }
+  .bookmarks-hero { flex-wrap: wrap; padding: 1.25rem; }
+  .bookmarks-hero-go { display: none; }
 }

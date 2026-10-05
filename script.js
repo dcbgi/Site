@@ -43,6 +43,13 @@ const projects = [
     demo: "experiences/codecracker/index.html",
   },
   {
+    title: "Bookmarks",
+    icon: "🔖",
+    desc: "My private link collection — sign in with Google to open your own bookmarks, synced across devices. Everyone who signs in gets their own set plus a few of my recommendations.",
+    tags: ["HTML", "CSS", "JavaScript", "Firebase", "Private"],
+    demo: "experiences/bookmarks/index.html",
+  },
+  {
     title: "Personal Profile Site",
     icon: "🌐",
     desc: "This website — a personal profile and project showcase built with vanilla HTML, CSS and JavaScript.",

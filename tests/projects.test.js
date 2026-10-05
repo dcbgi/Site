@@ -6,6 +6,7 @@
 const fs   = require("fs");
 const path = require("path");
 const { projects, moreProjects, renderProjects, escapeHtml } = require("../script.js");
+const { GREETINGS, QUOTES } = require("../home.js");
 
 // ─── Nav-logo home link ───────────────────────────────────────────────────────
 
@@ -279,7 +280,7 @@ describe("experiences/bookchallenge/index.html external assets", () => {
 // ─── Navigation / routing ─────────────────────────────────────────────────────
 
 describe("sub-page back links point to index.html", () => {
-  const subPages = ["experiences/codecracker/index.html", "experiences/howsyourday/index.html", "experiences/tvtracker/index.html", "experiences/bookchallenge/index.html"];
+  const subPages = ["experiences/codecracker/index.html", "experiences/howsyourday/index.html", "experiences/tvtracker/index.html", "experiences/bookchallenge/index.html", "experiences/bookmarks/index.html"];
 
   subPages.forEach((page) => {
     describe(page, () => {
@@ -421,4 +422,130 @@ describe("renderProjects", () => {
     projects.push(...originalProjects);
   });
 });
+
+// ─── Bookmarks experience (private, Firebase-backed) ──────────────────────────
+
+describe("experiences/bookmarks/index.html external assets", () => {
+  let doc;
+
+  beforeAll(() => {
+    const html = fs.readFileSync(path.join(__dirname, "..", "experiences/bookmarks/index.html"), "utf8");
+    doc = new DOMParser().parseFromString(html, "text/html");
+  });
+
+  test("links shared.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("../../shared.css");
+  });
+
+  test("links style.css", () => {
+    const links = [...doc.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href"));
+    expect(links).toContain("style.css");
+  });
+
+  test("loads script.js as a module via <script src>", () => {
+    const moduleScripts = [...doc.querySelectorAll('script[src]')]
+      .filter((s) => s.getAttribute("type") === "module")
+      .map((s) => s.getAttribute("src"));
+    expect(moduleScripts).toContain("script.js");
+  });
+
+  test("has no inline <style> block", () => {
+    expect(doc.querySelectorAll("style").length).toBe(0);
+  });
+
+  test("has no inline <script> block", () => {
+    const inlineScripts = [...doc.querySelectorAll("script")].filter((s) => !s.getAttribute("src"));
+    expect(inlineScripts.length).toBe(0);
+  });
+
+  test("gates content behind a Google sign-in button", () => {
+    expect(doc.getElementById("sign-in-btn")).not.toBeNull();
+    expect(doc.getElementById("auth-gate")).not.toBeNull();
+  });
+});
+
+describe("Bookmarks tile in the projects hub", () => {
+  test("exactly one project titled 'Bookmarks'", () => {
+    const matches = projects.filter((p) => p.title === "Bookmarks");
+    expect(matches.length).toBe(1);
+  });
+
+  test("links to the bookmarks experience page", () => {
+    const bm = projects.find((p) => p.title === "Bookmarks");
+    expect(bm).toBeDefined();
+    expect(bm.demo).toBe("experiences/bookmarks/index.html");
+  });
+
+  test("the linked demo page exists on disk", () => {
+    const bm = projects.find((p) => p.title === "Bookmarks");
+    const filePath = path.join(__dirname, "..", bm.demo);
+    expect(fs.existsSync(filePath)).toBe(true);
+  });
+});
+
+describe("bookmarks seed file is kept private (gitignored)", () => {
+  test(".gitignore excludes experiences/bookmarks/my-bookmarks.js", () => {
+    const gitignore = fs.readFileSync(path.join(__dirname, "..", ".gitignore"), "utf8");
+    const lines = gitignore.split(/\r?\n/).map((l) => l.trim());
+    expect(lines).toContain("experiences/bookmarks/my-bookmarks.js");
+  });
+});
+
+// ─── Homepage greetings & quotes (home.js) ────────────────────────────────────
+
+describe("home.js GREETINGS", () => {
+  test("is a non-empty array", () => {
+    expect(Array.isArray(GREETINGS)).toBe(true);
+    expect(GREETINGS.length).toBeGreaterThan(0);
+  });
+
+  GREETINGS.forEach((g, i) => {
+    test(`greeting[${i}] has non-empty text and region strings`, () => {
+      expect(typeof g.text).toBe("string");
+      expect(g.text.trim().length).toBeGreaterThan(0);
+      expect(typeof g.region).toBe("string");
+      expect(g.region.trim().length).toBeGreaterThan(0);
+    });
+  });
+});
+
+describe("home.js QUOTES", () => {
+  test("is an array with a deep roster (>= 50)", () => {
+    expect(Array.isArray(QUOTES)).toBe(true);
+    expect(QUOTES.length).toBeGreaterThanOrEqual(50);
+  });
+
+  QUOTES.forEach((q, i) => {
+    test(`quote[${i}] has non-empty text and author`, () => {
+      expect(typeof q.text).toBe("string");
+      expect(q.text.trim().length).toBeGreaterThan(0);
+      expect(typeof q.author).toBe("string");
+      expect(q.author.trim().length).toBeGreaterThan(0);
+    });
+
+    test(`quote[${i}] is short (<= 200 chars)`, () => {
+      expect(q.text.length).toBeLessThanOrEqual(200);
+    });
+  });
+
+  test("has no duplicate quote texts", () => {
+    const texts = QUOTES.map((q) => q.text);
+    expect(new Set(texts).size).toBe(texts.length);
+  });
+
+  test("quote text stays generic — never name-drops a philosopher", () => {
+    // The quote line itself should read generically; only the attribution
+    // underneath names the author. This guards the 'no names/places in the
+    // text' requirement (e.g. the removed 'Sisyphus' line).
+    const authorNames = QUOTES.map((q) => q.author);
+    QUOTES.forEach((q) => {
+      authorNames.forEach((name) => {
+        expect(q.text).not.toContain(name);
+      });
+      expect(q.text).not.toContain("Sisyphus");
+    });
+  });
+});
+
 

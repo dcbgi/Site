@@ -1,0 +1,278 @@
+/* ── bookmarks/style.css ─────────────────────────────────────────────────────
+   Page-specific styles for the private Bookmarks experience. shared.css
+   (loaded first) provides the design tokens, reset, navbar, and base styles.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --danger:  #ef5a6f;
+  --success: #3ecf8e;
+}
+
+main {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+/* ── Page header ─────────────────────────────────────────────────────────── */
+.page-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.page-header h1 {
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  font-weight: 800;
+}
+.page-header p {
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+}
+
+/* ── Status banner ───────────────────────────────────────────────────────── */
+.banner {
+  display: none;
+  margin: 0 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+}
+.banner.visible { display: block; }
+.banner.info  { background: var(--surface2); color: var(--text); }
+.banner.warn  { background: rgba(239,160,90,.12); border-color: #efa05a; color: #f0b27a; }
+.banner.error { background: rgba(239,90,111,.12); border-color: var(--danger); color: #f08a98; }
+
+/* ── Login wall ──────────────────────────────────────────────────────────── */
+.auth-gate {
+  display: flex;
+  justify-content: center;
+  padding: 2.5rem 0;
+}
+.auth-card {
+  background: linear-gradient(180deg, var(--surface2), var(--surface));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 2.75rem 2rem;
+  max-width: 440px;
+  text-align: center;
+}
+.auth-lock { font-size: 2.75rem; margin-bottom: 0.5rem; }
+.auth-card h2 { font-size: 1.4rem; margin-bottom: 0.6rem; }
+.auth-card p { color: var(--text-muted); margin-bottom: 1.5rem; }
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.7rem 1.1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface2);
+  cursor: pointer;
+  transition: transform var(--transition), background var(--transition),
+              border-color var(--transition), box-shadow var(--transition);
+}
+.btn:hover { transform: translateY(-1px); border-color: var(--accent); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-lt); }
+.btn-ghost { background: transparent; }
+.btn-google {
+  background: #fff;
+  color: #1f1f1f;
+  border-color: #fff;
+  font-size: 1rem;
+  padding: 0.8rem 1.4rem;
+}
+.btn-google:hover { background: #f1f1f1; border-color: #f1f1f1; }
+.btn-google .g-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: conic-gradient(from -45deg, #ea4335 0 25%, #fbbc05 0 50%, #34a853 0 75%, #4285f4 0);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+
+/* ── Account row ─────────────────────────────────────────────────────────── */
+.account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.account-row strong { color: var(--text); }
+.account-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ── Panels & form ───────────────────────────────────────────────────────── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.panel-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+}
+.bm-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+.form-field { display: flex; flex-direction: column; gap: 0.35rem; }
+.form-field-wide { grid-column: span 1; }
+.form-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+.form-input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  color: var(--text);
+  font-size: 0.95rem;
+  width: 100%;
+}
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124,106,247,.2);
+}
+
+/* ── Toolbar / search ────────────────────────────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.search-input { flex: 1; }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  padding: 0.25rem 0.6rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ── Bookmark groups & cards ─────────────────────────────────────────────── */
+.bm-group { margin-bottom: 1.75rem; }
+.bm-group-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.bm-group-count {
+  background: var(--surface2);
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+  font-size: 0.75rem;
+}
+.bm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.85rem;
+}
+.bm-card {
+  position: relative;
+  display: flex;
+  background: linear-gradient(180deg, var(--surface2), var(--surface));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: transform var(--transition), border-color var(--transition),
+              box-shadow var(--transition);
+}
+.bm-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+}
+.bm-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 2.25rem 1rem 1rem;
+  flex: 1;
+  color: var(--text);
+  text-decoration: none;
+  min-width: 0;
+}
+.bm-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bm-host { font-size: 0.8rem; color: var(--text-muted); }
+
+/* Hide / unhide button — non-destructive; the doc stays in Firestore. */
+.bm-hide {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition), background var(--transition), color var(--transition);
+}
+.bm-card:hover .bm-hide { opacity: 1; }
+.bm-hide:hover { background: rgba(124,106,247,.15); color: var(--accent-lt); }
+
+/* A hidden bookmark shown only in "Show hidden" mode — dimmed, with its
+   unhide button always visible so it's easy to bring back. */
+.bm-card-hidden { opacity: 0.5; border-style: dashed; }
+.bm-card-hidden .bm-hide { opacity: 1; }
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--text-muted);
+}
+.empty-state[hidden] { display: none; }
+.empty-icon { font-size: 2.25rem; margin-bottom: 0.5rem; }
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 680px) {
+  .bm-form { grid-template-columns: 1fr; }
+  .btn-primary { width: 100%; }
+}

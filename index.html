@@ -14,11 +14,48 @@
   </nav>
 
   <main class="hub">
-    <h1 class="hub-heading">Choose Your <span class="accent">Experience</span></h1>
+
+    <!-- ── Personal welcome (greeting + live date/clock) ─────────────────────
+         Text is filled in by home.js. Edit the greeting wording in
+         home.js → GREETINGS (buckets by time of day). -->
+    <section class="welcome" id="welcome">
+      <p class="welcome-date" id="welcome-date"></p>
+      <h1 class="welcome-greeting" id="welcome-greeting">Welcome back</h1>
+      <p class="welcome-quote" id="welcome-quote"></p>
+      <p class="welcome-clock" id="welcome-clock"></p>
+    </section>
+
+    <!-- ── Featured: Bookmarks (daily driver) ─────────────────────────────────
+         The primary thing on this homepage — a big quick-launch into the
+         private bookmark page. -->
+    <a class="bookmarks-hero" href="experiences/bookmarks/index.html">
+      <span class="bookmarks-hero-icon" aria-hidden="true">🔖</span>
+      <span class="bookmarks-hero-text">
+        <span class="bookmarks-hero-title">My Bookmarks</span>
+        <span class="bookmarks-hero-sub">Your private links — sign in and jump back in</span>
+      </span>
+      <span class="bookmarks-hero-go" aria-hidden="true">→</span>
+    </a>
+
+    <h2 class="hub-heading">Choose Your <span class="accent">Experience</span></h2>
     <p class="hub-subtitle">Pick something to explore</p>
 
     <!-- Experience tiles rendered dynamically by script.js -->
     <div class="experiences-grid" id="projects-grid"></div>
+
+    <!-- ── Live feeds from the other experiences (low priority) ───────────────
+         Small snippets filled by home.js. Each links to its experience using
+         the same paths as the tiles. -->
+    <section class="feeds" id="feeds" aria-label="Live snippets from your experiences">
+      <a class="feed-card" href="experiences/bookchallenge/index.html" id="feed-books">
+        <div class="feed-head"><span class="feed-icon" aria-hidden="true">📚</span> Book Challenge</div>
+        <div class="feed-body" data-feed="books">Loading scoreboard…</div>
+      </a>
+      <a class="feed-card" href="experiences/tvtracker/index.html" id="feed-tv">
+        <div class="feed-head"><span class="feed-icon" aria-hidden="true">🎬</span> TV Tracker</div>
+        <div class="feed-body" data-feed="tv">Loading recent logs…</div>
+      </a>
+    </section>
   </main>
 
   <footer class="footer">
@@ -26,5 +63,6 @@
   </footer>
 
   <script src="script.js"></script>
+  <script type="module" src="home.js"></script>
 </body>
 </html>
