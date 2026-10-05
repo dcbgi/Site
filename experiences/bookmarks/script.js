@@ -381,6 +381,14 @@ function setHidden(id, hidden) {
     .catch(function (err) { showBanner("⚠️ Couldn't update: " + err.message, "error"); });
 }
 
+// Pin / unpin a bookmark to the ⭐ Most Used section (manual favorite). Writes a
+// `pinned` flag; the render step shows pinned items in Most Used regardless of
+// their click count, deduped against the click-based entries.
+function setPinned(id, pinned) {
+  updateDoc(doc(db, "bookmarks", id), { pinned: pinned })
+    .catch(function (err) { showBanner("⚠️ Couldn't update: " + err.message, "error"); });
+}
+
 // ── Search ──────────────────────────────────────────────────────────────────
 document.getElementById("search-input").addEventListener("input", function (e) {
   searchTerm = e.target.value.trim().toLowerCase();
@@ -458,12 +466,18 @@ function cardHtml(b) {
   var href = safeHref(b.url);
   var host = hostLabel(b.url);
   var isHidden = !!b.hidden;
+  var isPinned = !!b.pinned;
   return (
-    '<div class="bm-card' + (isHidden ? ' bm-card-hidden' : '') + '" data-id="' + esc(b.id) + '">' +
+    '<div class="bm-card' + (isHidden ? ' bm-card-hidden' : '') + (isPinned ? ' bm-card-pinned' : '') + '" data-id="' + esc(b.id) + '">' +
       '<a class="bm-link" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">' +
         '<span class="bm-title">' + esc(b.title) + '</span>' +
         (host ? '<span class="bm-host">' + esc(host) + '</span>' : "") +
       '</a>' +
+      '<button class="bm-pin' + (isPinned ? ' is-pinned' : '') + '" data-id="' + esc(b.id) + '"' +
+        ' data-pinned="' + isPinned + '"' +
+        ' title="' + (isPinned ? 'Unpin from Most Used' : 'Pin to Most Used') + '"' +
+        ' aria-label="' + (isPinned ? 'Unpin bookmark' : 'Pin bookmark to Most Used') + '">' +
+        '\ud83d\udccc</button>' +
       '<button class="bm-hide" data-id="' + esc(b.id) + '" data-hidden="' + isHidden + '"' +
         ' title="' + (isHidden ? 'Unhide' : 'Hide') + '"' +
         ' aria-label="' + (isHidden ? 'Unhide bookmark' : 'Hide bookmark') + '">' +
@@ -545,15 +559,24 @@ function render() {
   // When a search is active, force every group open so matches are visible.
   var searching = !!searchTerm;
 
-  // ⭐ Most Used: mirror the top-clicked bookmarks in a pinned section at the
-  // top. Hidden off during search (the group list already surfaces matches).
+  // ⭐ Most Used: a deduped union of MANUALLY PINNED bookmarks (always shown,
+  // even with zero clicks) followed by your most-clicked ones to fill out the
+  // section. The two mechanisms don't conflict — a bookmark that is both pinned
+  // and top-clicked appears once, and pinned items are never pushed out by the
+  // click-based fill. Hidden off during search (the group list surfaces matches).
   var favHtml = "";
   if (!searching) {
-    var favs = filtered
-      .filter(function (b) { return clicksOfBookmark(b) > 0; })
-      .slice()
-      .sort(byClicksDesc)
-      .slice(0, FAV_LIMIT);
+    var favSeen = {};
+    var favs = [];
+    // 1) Pinned first, in click order so your most-used pins lead.
+    filtered.filter(function (b) { return b.pinned; }).sort(byClicksDesc)
+      .forEach(function (b) { if (!favSeen[b.id]) { favSeen[b.id] = true; favs.push(b); } });
+    // 2) Then top-clicked (clicks > 0) to fill remaining slots.
+    filtered.filter(function (b) { return !b.pinned && clicksOfBookmark(b) > 0; }).sort(byClicksDesc)
+      .forEach(function (b) {
+        if (favs.length >= FAV_LIMIT || favSeen[b.id]) return;
+        favSeen[b.id] = true; favs.push(b);
+      });
     if (favs.length) {
       favHtml =
         '<details class="bm-group bm-favorites" data-key="' + esc(FAV_KEY) + '"' + (favIsOpen() ? ' open' : '') + '>' +
@@ -617,6 +640,18 @@ document.getElementById("bookmarks-container").addEventListener("click", functio
   if (!btn) return;
   var isHidden = btn.dataset.hidden === "true";
   setHidden(btn.dataset.id, !isHidden);
+});
+
+// Pin / unpin to the ⭐ Most Used section. This is a MANUAL override that's
+// independent of click popularity — pinned bookmarks always appear in Most Used
+// regardless of clicks, and unpinning just removes the manual flag (a still-
+// popular link may remain in Most Used via the click-based fill). Stored as a
+// `pinned` flag on the doc so it syncs across devices.
+document.getElementById("bookmarks-container").addEventListener("click", function (e) {
+  var btn = e.target.closest(".bm-pin");
+  if (!btn) return;
+  var isPinned = btn.dataset.pinned === "true";
+  setPinned(btn.dataset.id, !isPinned);
 });
 
 // Count a click when a bookmark link is opened, so popularity ordering can
