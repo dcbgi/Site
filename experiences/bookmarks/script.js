@@ -419,6 +419,25 @@ function sumClicks(list) {
   return list.reduce(function (t, b) { return t + clicksOfBookmark(b); }, 0);
 }
 
+// ── Favorites ("Most Used") ──────────────────────────────────────────────────
+// A pinned section at the very top that mirrors your most-clicked bookmarks, so
+// your daily drivers are one glance away. The same bookmarks ALSO still appear
+// in their normal group/category below — this is an additional shortcut view,
+// not a move. Only links with at least one click qualify, capped at FAV_LIMIT.
+// Unlike other groups it defaults to OPEN (stored separately so the generic
+// "removed = closed" convention doesn't force it back open after you close it).
+var FAV_KEY = "\u2b50 Most Used";
+var FAV_LIMIT = 8;
+function favIsOpen() {
+  var v;
+  try { v = localStorage.getItem(groupStorageKey(FAV_KEY)); } catch (e) { v = null; }
+  return v === null ? true : v === "1";   // default open
+}
+function setFavOpen(open) {
+  try { localStorage.setItem(groupStorageKey(FAV_KEY), open ? "1" : "0"); }
+  catch (e) { /* ignore storage errors */ }
+}
+
 // Collapsible group open/closed state, remembered per group in localStorage so
 // it persists across reloads. Default is CLOSED; opening a group remembers it
 // until you close it again (that's the "unless I set it otherwise" behaviour).
@@ -526,7 +545,26 @@ function render() {
   // When a search is active, force every group open so matches are visible.
   var searching = !!searchTerm;
 
-  container.innerHTML = orderByClicks(Object.keys(tree), function (k) { return tree[k].clicks; }).map(function (top) {
+  // ⭐ Most Used: mirror the top-clicked bookmarks in a pinned section at the
+  // top. Hidden off during search (the group list already surfaces matches).
+  var favHtml = "";
+  if (!searching) {
+    var favs = filtered
+      .filter(function (b) { return clicksOfBookmark(b) > 0; })
+      .slice()
+      .sort(byClicksDesc)
+      .slice(0, FAV_LIMIT);
+    if (favs.length) {
+      favHtml =
+        '<details class="bm-group bm-favorites" data-key="' + esc(FAV_KEY) + '"' + (favIsOpen() ? ' open' : '') + '>' +
+          '<summary class="bm-group-title">' + esc(FAV_KEY) +
+            ' <span class="bm-group-count">' + favs.length + '</span></summary>' +
+          '<div class="bm-grid">' + favs.map(cardHtml).join("") + '</div>' +
+        '</details>';
+    }
+  }
+
+  var groupsHtml = orderByClicks(Object.keys(tree), function (k) { return tree[k].clicks; }).map(function (top) {
     var node = tree[top];
     var inner = "";
 
@@ -556,6 +594,8 @@ function render() {
       '</details>'
     );
   }).join("");
+
+  container.innerHTML = favHtml + groupsHtml;
 }
 
 // Persist expand/collapse. The `toggle` event doesn't bubble, so listen in the
@@ -565,6 +605,9 @@ document.getElementById("bookmarks-container").addEventListener("toggle", functi
   var d = e.target;
   if (!d || !d.matches || !d.matches("details[data-key]")) return;
   if (searchTerm) return;
+  // The Favorites section tracks its own open state (default open), so persist
+  // it explicitly rather than via the generic "removed = closed" convention.
+  if (d.getAttribute("data-key") === FAV_KEY) { setFavOpen(d.open); return; }
   setGroupOpen(d.getAttribute("data-key"), d.open);
 }, true);
 

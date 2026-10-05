@@ -242,6 +242,17 @@ details[open] > summary.bm-subgroup-title::before { transform: rotate(90deg); }
 /* A touch of breathing room below an open group's contents. */
 details.bm-group[open] { padding-bottom: 0.25rem; }
 
+/* ⭐ Most Used — the pinned favorites section at the top. */
+details.bm-favorites > summary.bm-group-title {
+  color: var(--accent-lt);
+  font-size: 0.95rem;
+}
+details.bm-favorites {
+  padding: 0.25rem 0 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
 .bm-group-count {
   background: var(--surface2);
   border-radius: 999px;
