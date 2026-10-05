@@ -215,6 +215,33 @@ main {
   align-items: center;
   gap: 0.5rem;
 }
+
+/* ── Collapsible groups (<details>/<summary>) ─────────────────────────────── */
+/* Groups and sub-groups are <details> elements, closed by default. The summary
+   is the clickable header; we hide the native marker and use our own rotating
+   triangle. A collapsed group adds no bottom margin from its (now hidden)
+   contents, keeping the closed list compact. */
+details.bm-group > summary.bm-group-title,
+details.bm-subgroup > summary.bm-subgroup-title {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+summary.bm-group-title::-webkit-details-marker,
+summary.bm-subgroup-title::-webkit-details-marker { display: none; }
+summary.bm-group-title::before,
+summary.bm-subgroup-title::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 0.4rem;
+  color: var(--text-muted);
+  transition: transform var(--transition);
+}
+details[open] > summary.bm-group-title::before,
+details[open] > summary.bm-subgroup-title::before { transform: rotate(90deg); }
+/* A touch of breathing room below an open group's contents. */
+details.bm-group[open] { padding-bottom: 0.25rem; }
+
 .bm-group-count {
   background: var(--surface2);
   border-radius: 999px;

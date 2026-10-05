@@ -340,7 +340,9 @@ function writeBookmarks(uid, items) {
         category: b.category,
         group: b.group || "",
         ownerUid: uid,
-        createdAt: Date.now() - (fresh.length - i), // preserve listed order
+        // The list query sorts by createdAt DESC, so earlier items in the file
+        // need LARGER timestamps to appear first — preserving the file's order.
+        createdAt: Date.now() - i,
       });
     }
     return batch.commit().then(commitChunk);
@@ -398,22 +400,32 @@ document.getElementById("toggle-hidden-btn").addEventListener("click", function 
 // categories, so form-added and browser-imported links still work. The hide
 // button lives on each card, so hiding works at any nesting depth.
 
-// Orders keys by an explicit priority list first, then alphabetically.
-function orderKeys(keys, priority) {
+// Orders group keys by how many bookmarks each contains (most first). Ties are
+// broken alphabetically. "Welcome" is pinned to the very top when present.
+// `countOf(key)` returns the bookmark count for a given key.
+function orderByCount(keys, countOf) {
   return keys.slice().sort(function (a, b) {
-    var ia = priority.indexOf(a), ib = priority.indexOf(b);
-    if (ia !== -1 && ib !== -1) return ia - ib;
-    if (ia !== -1) return -1;
-    if (ib !== -1) return 1;
-    return a.localeCompare(b);
+    if (a === "Welcome") return -1;
+    if (b === "Welcome") return 1;
+    var d = countOf(b) - countOf(a);   // bigger count first
+    return d !== 0 ? d : a.localeCompare(b);
   });
 }
-var TOP_ORDER = ["Welcome", "Daily", "School", "Projects", "Finance", "Health",
-  "Site", "Work", "Home", "Reading", "Shopping", "Entertainment",
-  "Outdoors & Rec", "Tools", "Weather", "Sims"];
-var SUB_ORDER = ["My Projects", "Learning", "A+ (CompTIA)",
-  "Professional Development", "Programming", "Web Scraping",
-  "Flutter & Databases", "Dev Tools", "Mods", "CC"];
+
+// Collapsible group open/closed state, remembered per group in localStorage so
+// it persists across reloads. Default is CLOSED; opening a group remembers it
+// until you close it again (that's the "unless I set it otherwise" behaviour).
+function groupStorageKey(key) { return "bm_open_" + key; }
+function isGroupOpen(key) {
+  try { return localStorage.getItem(groupStorageKey(key)) === "1"; }
+  catch (e) { return false; }
+}
+function setGroupOpen(key, open) {
+  try {
+    if (open) localStorage.setItem(groupStorageKey(key), "1");
+    else localStorage.removeItem(groupStorageKey(key));
+  } catch (e) { /* ignore storage errors */ }
+}
 
 // Builds the HTML for a single bookmark card.
 function cardHtml(b) {
@@ -493,7 +505,10 @@ function render() {
     }
   });
 
-  container.innerHTML = orderKeys(Object.keys(tree), TOP_ORDER).map(function (top) {
+  // When a search is active, force every group open so matches are visible.
+  var searching = !!searchTerm;
+
+  container.innerHTML = orderByCount(Object.keys(tree), function (k) { return tree[k].count; }).map(function (top) {
     var node = tree[top];
     var inner = "";
 
@@ -501,26 +516,39 @@ function render() {
     if (node.direct.length) {
       inner += '<div class="bm-grid">' + node.direct.map(cardHtml).join("") + '</div>';
     }
-    // Then each sub-category as its own labelled block.
-    orderKeys(Object.keys(node.subs), SUB_ORDER).forEach(function (sub) {
+    // Then each sub-category as its own collapsible block, most-populated first.
+    orderByCount(Object.keys(node.subs), function (k) { return node.subs[k].length; }).forEach(function (sub) {
       var subCards = node.subs[sub];
+      var subKey = top + "\u241f" + sub;              // unit-separator avoids clashes
+      var subOpen = searching || isGroupOpen(subKey);
       inner +=
-        '<div class="bm-subgroup">' +
-          '<h4 class="bm-subgroup-title">' + esc(sub) +
-            ' <span class="bm-group-count">' + subCards.length + '</span></h4>' +
+        '<details class="bm-subgroup" data-key="' + esc(subKey) + '"' + (subOpen ? ' open' : '') + '>' +
+          '<summary class="bm-subgroup-title">' + esc(sub) +
+            ' <span class="bm-group-count">' + subCards.length + '</span></summary>' +
           '<div class="bm-grid">' + subCards.map(cardHtml).join("") + '</div>' +
-        '</div>';
+        '</details>';
     });
 
+    var topOpen = searching || isGroupOpen(top);
     return (
-      '<section class="bm-group">' +
-        '<h3 class="bm-group-title">' + esc(top) +
-          ' <span class="bm-group-count">' + node.count + '</span></h3>' +
+      '<details class="bm-group" data-key="' + esc(top) + '"' + (topOpen ? ' open' : '') + '>' +
+        '<summary class="bm-group-title">' + esc(top) +
+          ' <span class="bm-group-count">' + node.count + '</span></summary>' +
         inner +
-      '</section>'
+      '</details>'
     );
   }).join("");
 }
+
+// Persist expand/collapse. The `toggle` event doesn't bubble, so listen in the
+// capture phase. Skip saving while a search is active (groups are force-opened
+// then, and we don't want that to overwrite the user's saved preferences).
+document.getElementById("bookmarks-container").addEventListener("toggle", function (e) {
+  var d = e.target;
+  if (!d || !d.matches || !d.matches("details[data-key]")) return;
+  if (searchTerm) return;
+  setGroupOpen(d.getAttribute("data-key"), d.open);
+}, true);
 
 // Hide / unhide via event delegation (cards are re-rendered on every change).
 document.getElementById("bookmarks-container").addEventListener("click", function (e) {
