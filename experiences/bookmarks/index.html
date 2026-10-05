@@ -43,7 +43,8 @@
       <div class="account-row">
         <span class="account-label">Signed in as <strong id="account-email">…</strong></span>
         <div class="account-actions">
-          <button type="button" class="btn btn-ghost" id="import-mine-btn" hidden title="One-time import of your personal links into your private list">⬆ Import my bookmarks</button>
+          <button type="button" class="btn btn-ghost" id="import-mine-btn" hidden title="Import bookmarks from a file on your computer (browser export .html or a .json list)">⬆ Import bookmarks</button>
+          <input type="file" id="import-file" accept=".html,.htm,.json,text/html,application/json" hidden />
           <button type="button" class="btn btn-ghost" id="sign-out-btn">Sign out</button>
         </div>
       </div>

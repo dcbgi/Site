@@ -8,6 +8,11 @@
   --success: #3ecf8e;
 }
 
+/* The HTML `hidden` attribute must always win over component display rules
+   (e.g. `.auth-gate { display: flex }`). Without this, setting `hidden` in JS
+   has no visual effect and the element stays on screen. */
+[hidden] { display: none !important; }
+
 main {
   max-width: 980px;
   margin: 0 auto;

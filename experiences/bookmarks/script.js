@@ -15,13 +15,13 @@
 // flag) so it drops out of the visible list while its document remains in
 // Firestore permanently — a "Show hidden" toggle brings hidden items back.
 //
-// PRIVATE OWNER IMPORT: the owner's full personal link set lives in the
-// OPTIONAL file my-bookmarks.js. It is NOT auto-seeded and NOT statically
-// imported — instead the owner clicks "Import my bookmarks" once, which lazily
-// loads that file and writes the links into their private Firestore list. After
-// importing, the owner can DELETE my-bookmarks.js and redeploy: the links then
-// live only in Firestore (never in the repo or shipped JS), and this page keeps
-// working because the import is lazy and fails gracefully when the file is gone.
+// PRIVATE OWNER IMPORT: the owner clicks "Import bookmarks" and picks a file
+// from their own computer — either a browser bookmarks export (.html, the
+// Netscape format every browser produces) or a .json array of
+// { title, url, category }. The file is read and parsed IN THE BROWSER and the
+// links are written to the owner's private Firestore list. The file never
+// touches the repo or the server, so nothing is ever exposed — and because it's
+// a local file picker, this works on the live site with no localhost needed.
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
@@ -146,7 +146,12 @@ if (configIsPlaceholder) {
     document.getElementById("sign-out-btn").addEventListener("click", function () {
       signOut(auth);
     });
-    document.getElementById("import-mine-btn").addEventListener("click", importMyBookmarks);
+    // Owner-only file import: the button opens a file picker; selecting a file
+    // parses it in-browser and writes to Firestore (see handleImportFile).
+    document.getElementById("import-mine-btn").addEventListener("click", function () {
+      document.getElementById("import-file").click();
+    });
+    document.getElementById("import-file").addEventListener("change", handleImportFile);
   } catch (err) {
     showGate();
     showBanner("⚠️ Firebase failed to initialize: " + err.message, "error");
@@ -210,33 +215,135 @@ function writeDataset(uid, dataset) {
   });
 }
 
-// One-time, owner-only import of the full personal set from my-bookmarks.js.
-// Lazily imports the file so it can be DELETED from the repo afterwards without
-// breaking this page. If the file is gone (already imported + removed), it tells
-// the owner their bookmarks are already saved privately.
-function importMyBookmarks() {
-  if (!currentUid || !isOwner()) return;
-  if (bookmarks.length > 0) {
-    showBanner("You already have bookmarks saved — import skipped so nothing is duplicated.", "info");
-    return;
-  }
-  var btn = document.getElementById("import-mine-btn");
-  btn.disabled = true;
-  showBanner("Importing your bookmarks…", "info");
-  import("./my-bookmarks.js").then(function (mod) {
-    var data = mod.MY_BOOKMARKS || [];
-    return writeDataset(currentUid, data).then(function (count) {
-      if (count > 0) {
-        showBanner("✅ Imported " + count + " bookmarks into your private list. You can now delete my-bookmarks.js from the repo — your links live only in your account.", "info");
-      } else {
-        showBanner("Nothing imported — your account already has bookmarks.", "info");
-      }
+// ── File import (owner only) ─────────────────────────────────────────────────
+// Reads a user-picked file entirely in the browser. Accepts either a JSON array
+// of { title, url, category } or a browser bookmarks HTML export (Netscape
+// format). Parsed links are written to the owner's private Firestore list,
+// de-duplicated by URL so re-importing never creates duplicates.
+function handleImportFile(e) {
+  var file = e.target.files && e.target.files[0];
+  e.target.value = ""; // reset so picking the same file again re-fires change
+  if (!file || !currentUid || !isOwner()) return;
+
+  var reader = new FileReader();
+  reader.onload = function () {
+    var text = String(reader.result || "");
+    var items = [];
+
+    // Try JSON first; if it isn't valid JSON, parse it as bookmarks HTML.
+    try {
+      var parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) items = parsed;
+    } catch (err) { /* not JSON — fall through to HTML */ }
+    if (items.length === 0) items = parseBookmarksHTML(text);
+
+    // Keep only real web links (drops file://, javascript:, empty, etc.).
+    items = items.filter(function (b) { return b && b.url && /^https?:\/\//i.test(b.url); });
+
+    if (items.length === 0) {
+      showBanner("No importable web links found in that file.", "warn");
+      return;
+    }
+    showBanner("Importing " + items.length + " bookmarks…", "info");
+    writeBookmarks(currentUid, items).then(function (n) {
+      showBanner(
+        n > 0
+          ? "✅ Imported " + n + " new bookmark" + (n === 1 ? "" : "s") + " into your private list."
+          : "Nothing new to import — those links are already saved.",
+        "info"
+      );
+    }).catch(function (err) {
+      showBanner("⚠️ Import failed: " + err.message, "error");
     });
-  }).catch(function () {
-    showBanner("Nothing to import — my-bookmarks.js isn't present, so your bookmarks are already saved privately.", "info");
-  }).then(function () {
-    btn.disabled = false;
+  };
+  reader.onerror = function () { showBanner("⚠️ Couldn't read that file.", "error"); };
+  reader.readAsText(file);
+}
+
+// Parses a Netscape bookmarks HTML export into [{ title, url, category }].
+// Folder names (<H3>) become categories; links directly under the root fall
+// back to "Imported". Obvious throwaway search-result URLs are skipped.
+function parseBookmarksHTML(text) {
+  var out = [];
+  var docp;
+  try { docp = new DOMParser().parseFromString(text, "text/html"); }
+  catch (e) { return out; }
+
+  var SKIP = /[?&](?:q|search)=|\/search\?/i; // search-result links = noise
+
+  function walk(dl, category) {
+    for (var dt = dl.firstElementChild; dt; dt = dt.nextElementSibling) {
+      if (dt.tagName !== "DT") continue;
+      var h3 = dt.querySelector(":scope > h3");
+      var a  = dt.querySelector(":scope > a");
+      if (a) {
+        var href = a.getAttribute("href") || "";
+        if (/^https?:\/\//i.test(href) && !SKIP.test(href)) {
+          out.push({
+            title: (a.textContent || href).trim() || href,
+            url: href,
+            category: category,
+          });
+        }
+      }
+      if (h3) {
+        var folder = (h3.textContent || "").trim() || category;
+        // The folder's contents are in a nested <DL> (inside the DT per HTML
+        // parsing, or occasionally the DT's next sibling).
+        var sub = dt.querySelector(":scope > dl");
+        if (!sub && dt.nextElementSibling && dt.nextElementSibling.tagName === "DL") {
+          sub = dt.nextElementSibling;
+        }
+        if (sub) walk(sub, folder);
+      }
+    }
+  }
+
+  var root = docp.querySelector("dl");
+  if (root) walk(root, "Imported");
+  return out;
+}
+
+// Writes items into the signed-in owner's list, skipping any URL that already
+// exists (in Firestore or earlier in the same file). Commits in chunks to stay
+// under Firestore's 500-writes-per-batch limit. Resolves to the number added.
+function writeBookmarks(uid, items) {
+  var existing = {};
+  bookmarks.forEach(function (b) { if (b.url) existing[String(b.url).trim()] = true; });
+
+  var seen = {};
+  var fresh = [];
+  items.forEach(function (b) {
+    var url = String(b.url || "").trim();
+    if (!url || existing[url] || seen[url]) return;
+    seen[url] = true;
+    fresh.push({
+      title: String(b.title || url).trim() || url,
+      url: url,
+      category: String(b.category || "Imported").trim() || "Imported",
+    });
   });
+  if (fresh.length === 0) return Promise.resolve(0);
+
+  var i = 0;
+  function commitChunk() {
+    if (i >= fresh.length) return Promise.resolve(fresh.length);
+    var batch = writeBatch(db);
+    var end = Math.min(i + 400, fresh.length);
+    for (; i < end; i++) {
+      var b = fresh[i];
+      var ref = doc(collection(db, "bookmarks"));
+      batch.set(ref, {
+        title: b.title,
+        url: b.url,
+        category: b.category,
+        ownerUid: uid,
+        createdAt: Date.now() - (fresh.length - i), // preserve listed order
+      });
+    }
+    return batch.commit().then(commitChunk);
+  }
+  return commitChunk();
 }
 
 // ── Add / hide ───────────────────────────────────────────────────────────────
