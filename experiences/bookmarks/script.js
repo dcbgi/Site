@@ -31,7 +31,7 @@ import {
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { firebaseConfig, OWNER_EMAIL } from "./firebase-config.js";
+import { firebaseConfig, OWNER_EMAIL_HASH } from "./firebase-config.js";
 
 // ── Owner's recommendations ─────────────────────────────────────────────────
 // Seeded into every NEW signer's own private list the first time they sign in,
@@ -44,9 +44,35 @@ const RECOMMENDED = [
 ];
 
 // ── Owner check ─────────────────────────────────────────────────────────────
-function isOwner() {
-  return !!(OWNER_EMAIL && currentEmail &&
-    currentEmail.toLowerCase() === OWNER_EMAIL.toLowerCase());
+// The owner is identified by the SHA-256 hash of their email (OWNER_EMAIL_HASH
+// in firebase-config.js) — the plaintext email is never stored in the repo or
+// shipped JS. On sign-in we hash the signed-in email and compare; the boolean
+// result is cached in isOwnerFlag so the synchronous isOwner() calls elsewhere
+// stay simple.
+var isOwnerFlag = false;
+function isOwner() { return isOwnerFlag; }
+
+// SHA-256 → lowercase hex, via the browser's Web Crypto API.
+function sha256Hex(text) {
+  var data = new TextEncoder().encode(text);
+  return crypto.subtle.digest("SHA-256", data).then(function (buf) {
+    var bytes = new Uint8Array(buf);
+    var hex = "";
+    for (var i = 0; i < bytes.length; i++) {
+      hex += bytes[i].toString(16).padStart(2, "0");
+    }
+    return hex;
+  });
+}
+
+// Recomputes isOwnerFlag for the given email (resolves to the boolean too).
+// An empty OWNER_EMAIL_HASH disables owner features for everyone.
+function computeOwner(email) {
+  if (!OWNER_EMAIL_HASH || !email) { isOwnerFlag = false; return Promise.resolve(false); }
+  return sha256Hex(String(email).trim().toLowerCase()).then(function (h) {
+    isOwnerFlag = (h === OWNER_EMAIL_HASH.toLowerCase());
+    return isOwnerFlag;
+  }).catch(function () { isOwnerFlag = false; return false; });
 }
 
 // ── esc ─────────────────────────────────────────────────────────────────────
@@ -127,12 +153,16 @@ if (configIsPlaceholder) {
         currentEmail = user.email || null;
         hideBanner();
         showApp(user);
-        // Show the one-time import button only to the owner.
-        document.getElementById("import-mine-btn").hidden = !isOwner();
-        subscribeToBookmarks(user.uid);
+        // Hash the signed-in email to decide owner status, THEN wire owner UI
+        // and start the live subscription (which depends on isOwner()).
+        computeOwner(currentEmail).then(function () {
+          document.getElementById("import-mine-btn").hidden = !isOwner();
+          subscribeToBookmarks(user.uid);
+        });
       } else {
         currentUid = null;
         currentEmail = null;
+        isOwnerFlag = false;
         bookmarks = [];
         document.getElementById("import-mine-btn").hidden = true;
         showGate();

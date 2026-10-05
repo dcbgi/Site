@@ -43,9 +43,14 @@ export const firebaseConfig = {
 };
 
 // ── Owner identity ───────────────────────────────────────────────────────────
-// Your own Google account email. When YOU sign in, your full personal bookmark
-// set (my-bookmarks.js) is seeded into your private list on first use. Everyone
-// else who signs in just gets the small welcome/recommendations set. Leave blank
-// to disable owner seeding entirely (no one gets the personal set).
-export const OWNER_EMAIL = "deiondreaberry@gmail.com";
+// The SHA-256 hash of your own Google account email (lowercased). Your actual
+// email is NOT stored here — only its hash — so it never appears in the public
+// repo or the shipped JS. When YOU sign in, the page hashes your signed-in email
+// and compares it to this value; a match unlocks the owner-only import button.
+// Everyone else just gets the small welcome/recommendations set.
+//
+// To change the owner, run (lowercased, no trailing newline):
+//   printf '%s' 'you@example.com' | shasum -a 256
+// and paste the hex digest below. Leave blank to disable owner features.
+export const OWNER_EMAIL_HASH = "307890a9938a4cb39c82d0ef45a3b1039bb643aa789e8f0e8ad778751e962478";
 
