@@ -321,6 +321,7 @@ function writeBookmarks(uid, items) {
       title: String(b.title || url).trim() || url,
       url: url,
       category: String(b.category || "Imported").trim() || "Imported",
+      group: b.group ? String(b.group).trim() : "",  // optional top-level bucket
     });
   });
   if (fresh.length === 0) return Promise.resolve(0);
@@ -337,6 +338,7 @@ function writeBookmarks(uid, items) {
         title: b.title,
         url: b.url,
         category: b.category,
+        group: b.group || "",
         ownerUid: uid,
         createdAt: Date.now() - (fresh.length - i), // preserve listed order
       });
@@ -390,6 +392,49 @@ document.getElementById("toggle-hidden-btn").addEventListener("click", function 
   render();
 });
 // ── Render ──────────────────────────────────────────────────────────────────
+// Supports an optional two-level hierarchy: a bookmark's `group` is the
+// top-level bucket (e.g. "Projects") and `category` is the sub-bucket (e.g.
+// "Programming"). Bookmarks with no `group` render as flat top-level
+// categories, so form-added and browser-imported links still work. The hide
+// button lives on each card, so hiding works at any nesting depth.
+
+// Orders keys by an explicit priority list first, then alphabetically.
+function orderKeys(keys, priority) {
+  return keys.slice().sort(function (a, b) {
+    var ia = priority.indexOf(a), ib = priority.indexOf(b);
+    if (ia !== -1 && ib !== -1) return ia - ib;
+    if (ia !== -1) return -1;
+    if (ib !== -1) return 1;
+    return a.localeCompare(b);
+  });
+}
+var TOP_ORDER = ["Welcome", "Daily", "School", "Projects", "Finance", "Health",
+  "Site", "Work", "Home", "Reading", "Shopping", "Entertainment",
+  "Outdoors & Rec", "Tools", "Weather", "Sims"];
+var SUB_ORDER = ["My Projects", "Learning", "A+ (CompTIA)",
+  "Professional Development", "Programming", "Web Scraping",
+  "Flutter & Databases", "Dev Tools", "Mods", "CC"];
+
+// Builds the HTML for a single bookmark card.
+function cardHtml(b) {
+  var href = safeHref(b.url);
+  var host = hostLabel(b.url);
+  var isHidden = !!b.hidden;
+  return (
+    '<div class="bm-card' + (isHidden ? ' bm-card-hidden' : '') + '">' +
+      '<a class="bm-link" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">' +
+        '<span class="bm-title">' + esc(b.title) + '</span>' +
+        (host ? '<span class="bm-host">' + esc(host) + '</span>' : "") +
+      '</a>' +
+      '<button class="bm-hide" data-id="' + esc(b.id) + '" data-hidden="' + isHidden + '"' +
+        ' title="' + (isHidden ? 'Unhide' : 'Hide') + '"' +
+        ' aria-label="' + (isHidden ? 'Unhide bookmark' : 'Hide bookmark') + '">' +
+        (isHidden ? '↩' : '✕') +
+      '</button>' +
+    '</div>'
+  );
+}
+
 function render() {
   var container = document.getElementById("bookmarks-container");
   var emptyState = document.getElementById("bookmarks-empty-state");
@@ -426,42 +471,52 @@ function render() {
   }
   emptyState.hidden = true;
 
-  // Group by category, with "Welcome" first and the rest alphabetical.
-  var groups = {};
+  // Build a two-level tree:
+  //   tree[top] = { direct: [cards], subs: { subName: [cards] } }
+  // A bookmark with a `group` goes under group → category; one without a group
+  // goes directly under its category (a flat top-level section).
+  var tree = {};
+  function topNode(name) {
+    if (!tree[name]) tree[name] = { direct: [], subs: {}, count: 0 };
+    return tree[name];
+  }
   filtered.forEach(function (b) {
-    var c = b.category || "Uncategorized";
-    (groups[c] = groups[c] || []).push(b);
-  });
-  var order = Object.keys(groups).sort(function (a, b) {
-    if (a === "Welcome") return -1;
-    if (b === "Welcome") return 1;
-    return a.localeCompare(b);
+    var cat = b.category || "Uncategorized";
+    if (b.group) {
+      var node = topNode(b.group);
+      (node.subs[cat] = node.subs[cat] || []).push(b);
+      node.count++;
+    } else {
+      var node2 = topNode(cat);
+      node2.direct.push(b);
+      node2.count++;
+    }
   });
 
-  container.innerHTML = order.map(function (cat) {
-    var cards = groups[cat].map(function (b) {
-      var href = safeHref(b.url);
-      var host = hostLabel(b.url);
-      var isHidden = !!b.hidden;
-      return (
-        '<div class="bm-card' + (isHidden ? ' bm-card-hidden' : '') + '">' +
-          '<a class="bm-link" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">' +
-            '<span class="bm-title">' + esc(b.title) + '</span>' +
-            (host ? '<span class="bm-host">' + esc(host) + '</span>' : "") +
-          '</a>' +
-          '<button class="bm-hide" data-id="' + esc(b.id) + '" data-hidden="' + isHidden + '"' +
-            ' title="' + (isHidden ? 'Unhide' : 'Hide') + '"' +
-            ' aria-label="' + (isHidden ? 'Unhide bookmark' : 'Hide bookmark') + '">' +
-            (isHidden ? '↩' : '✕') +
-          '</button>' +
-        '</div>'
-      );
-    }).join("");
+  container.innerHTML = orderKeys(Object.keys(tree), TOP_ORDER).map(function (top) {
+    var node = tree[top];
+    var inner = "";
+
+    // Direct cards (flat categories, or loose items under a group) first.
+    if (node.direct.length) {
+      inner += '<div class="bm-grid">' + node.direct.map(cardHtml).join("") + '</div>';
+    }
+    // Then each sub-category as its own labelled block.
+    orderKeys(Object.keys(node.subs), SUB_ORDER).forEach(function (sub) {
+      var subCards = node.subs[sub];
+      inner +=
+        '<div class="bm-subgroup">' +
+          '<h4 class="bm-subgroup-title">' + esc(sub) +
+            ' <span class="bm-group-count">' + subCards.length + '</span></h4>' +
+          '<div class="bm-grid">' + subCards.map(cardHtml).join("") + '</div>' +
+        '</div>';
+    });
+
     return (
       '<section class="bm-group">' +
-        '<h3 class="bm-group-title">' + esc(cat) +
-          ' <span class="bm-group-count">' + groups[cat].length + '</span></h3>' +
-        '<div class="bm-grid">' + cards + '</div>' +
+        '<h3 class="bm-group-title">' + esc(top) +
+          ' <span class="bm-group-count">' + node.count + '</span></h3>' +
+        inner +
       '</section>'
     );
   }).join("");

@@ -191,6 +191,30 @@ main {
   align-items: center;
   gap: 0.5rem;
 }
+/* A top-level group that contains sub-categories gets a brand-coloured
+   heading + a divider, so the Projects → Programming nesting reads clearly. */
+.bm-group:has(.bm-subgroup) > .bm-group-title {
+  color: var(--accent-lt);
+  font-size: 0.95rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+/* Sub-category block, indented under its parent group. */
+.bm-subgroup {
+  margin: 1rem 0 1rem 1rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--border);
+}
+.bm-subgroup-title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 .bm-group-count {
   background: var(--surface2);
   border-radius: 999px;

@@ -5,4 +5,5 @@ node_modules/
 # links never appear in the public repo or the shipped site. Delete it once
 # you've imported (or keep it locally to re-import later).
 experiences/bookmarks/my-bookmarks.js
+experiences/bookmarks/my-bookmarks.json
 .DS_Store
