@@ -18,7 +18,12 @@
 // ── Greeting + quote ─────────────────────────────────────────────────────────
 // The big line is a regional US greeting (East-Coast-weighted city slang); the
 // line under it is a short philosophical quote on existence / perseverance.
-// Both are picked once per page load (the clock below ticks independently).
+// Both are picked once per CALENDAR DAY, per VISITOR (not per page load —
+// reloading or revisiting later the same day shows the same pair; the clock
+// below still ticks independently of either). "Per visitor" is a random id
+// stashed in this browser's localStorage the first time it visits — see
+// getVisitorSeed() below — so different people don't all see the identical
+// pick on the same day, but any one person's reloads stay stable.
 //
 // GREETINGS: { text, region } — region is shown small next to the greeting.
 // Edit/extend freely; weighting is just "add more of what you want to see".
@@ -109,11 +114,59 @@ const QUOTES = [
   { text: "He who is not contented with what he has, would not be contented with what he would like to have.", author: "Socrates" },
 ];
 
-function pick(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
+// ── dayNumber ─────────────────────────────────────────────────────────────
+// Whole number of days since the epoch, using the viewer's LOCAL calendar
+// date (not UTC) — so the greeting/quote roll over at local midnight, matching
+// what someone actually experiences as "a new day".
+function dayNumber() {
+  const now = new Date();
+  const localMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.floor(localMidnight.getTime() / 86400000);
 }
 
-// Chosen once per load so they stay put while the clock ticks every second.
+// ── seededIndex ───────────────────────────────────────────────────────────
+// Deterministic pseudo-random index in [0, length) for an integer seed: the
+// same seed always maps to the same index (unlike Math.random()), so the
+// same day always reproduces the same pick, but consecutive days still land
+// on different, non-sequential items instead of just cycling 0, 1, 2, …
+function seededIndex(seed, length) {
+  const x = Math.sin(seed) * 10000;
+  return Math.floor((x - Math.floor(x)) * length);
+}
+
+// ── getVisitorSeed ────────────────────────────────────────────────────────
+// A random integer generated once and kept in localStorage, so the same
+// browser reuses it on every future visit. This is what makes the pick
+// per-visitor rather than global — everyone's day number is the same, but
+// each visitor's seed is their own, so different people land on different
+// greetings/quotes on the same day.
+//
+// localStorage can throw (private browsing, disabled storage, a full quota)
+// — if so, fall back to a fresh random seed for this load only. The pick
+// still renders correctly; it just won't stay stable across that visitor's
+// future reloads until storage works again.
+const VISITOR_SEED_KEY = "home_visitor_seed";
+function getVisitorSeed() {
+  try {
+    const stored = localStorage.getItem(VISITOR_SEED_KEY);
+    if (stored) return parseInt(stored, 10);
+    const fresh = Math.floor(Math.random() * 1e6);
+    localStorage.setItem(VISITOR_SEED_KEY, String(fresh));
+    return fresh;
+  } catch (e) {
+    return Math.floor(Math.random() * 1e6);
+  }
+}
+
+// Picks today's item from `arr` for this visitor. `salt` offsets the seed
+// per-array so the greeting and quote don't move in lockstep just because
+// they share a day number and visitor seed.
+function pickOfTheDay(arr, salt, visitorSeed) {
+  return arr[seededIndex(dayNumber() + salt + visitorSeed, arr.length)];
+}
+
+// Chosen once per day (per visitor) so they stay put across reloads while
+// the clock below still ticks every second.
 let greeting = GREETINGS[0];
 let quote = QUOTES[0];
 
@@ -243,8 +296,9 @@ function renderTvFeed(shows) {
 
 // ── Boot ─────────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-  greeting = pick(GREETINGS);
-  quote = pick(QUOTES);
+  const visitorSeed = getVisitorSeed();
+  greeting = pickOfTheDay(GREETINGS, 0, visitorSeed);
+  quote = pickOfTheDay(QUOTES, 97, visitorSeed); // different salt — don't shift in sync with greeting
   renderIdentity();          // greeting + quote, once
   renderWelcome();           // date + clock, now
   setInterval(renderWelcome, 1000); // live-ticking clock
